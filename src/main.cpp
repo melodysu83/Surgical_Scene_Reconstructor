@@ -1,4 +1,4 @@
-#include "myproject/MyReconstr_Dependencies.h"
+#include "myproject/MyReconstr_Controller.h"
 
 int main(int argc, char **argv)
 {
@@ -16,18 +16,7 @@ int main(int argc, char **argv)
 
         // join the console_thread and ros_thread
         ctrl.join_thread();
-	/*
-	cout<<"Hello world hi there! boooo"<<endl;
-	Mat img_raw;
-	img_raw = imread("/media/melody/D\ folder/surgical\ scene_reconstruction/3.\ image_files_processed/surgical_scene_melody/left/05986.png");
-        namedWindow( "booo", WINDOW_AUTOSIZE ); // Create a window for display.
-	while(1)
-	{
-		imshow("booo",img_raw);
-		cv::waitKey(0);
-                usleep(3000000); //3 secs
-	}
-	*/
+	
         exit(1);
 }
 

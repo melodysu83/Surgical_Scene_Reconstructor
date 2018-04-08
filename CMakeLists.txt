@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   usb_cam
   message_generation
 )
+find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenCV 2 REQUIRED)
 ## System dependencies are found with CMake's conventions
@@ -123,7 +124,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS} 
+  ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -208,4 +210,4 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS})
 
 add_executable(Surgical_Scene_Reconstructor src/main.cpp src/MyReconstr_Controller.cpp src/MyReconstr_Display.cpp)
-target_link_libraries(Surgical_Scene_Reconstructor ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(Surgical_Scene_Reconstructor ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
