@@ -207,5 +207,5 @@ include_directories(
 include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS})
 
-add_executable(Surgical_Scene_Reconstructor src/main.cpp)
+add_executable(Surgical_Scene_Reconstructor src/main.cpp src/MyReconstr_Controller.cpp src/MyReconstr_Display.cpp)
 target_link_libraries(Surgical_Scene_Reconstructor ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
