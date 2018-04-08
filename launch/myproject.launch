@@ -1,0 +1,34 @@
+<launch>
+
+  <arg name="IMG_DIR" value="/media/melody/D\ folder/surgical\ scene_reconstruction/3.\ image_files_processed"/>
+  <arg name="TME_DIR" value="/media/melody/D\ folder/surgical\ scene_reconstruction/3.\ csv_files_after_pnp\img_timestamp_after_pnp"/>
+  <arg name="POS_DIR" value="/media/melody/D\ folder/surgical\ scene_reconstruction/3.\ csv_files_after_pnp\cam_pose_after_pnp"/>
+  <arg name="CAL_DIR" value="/media/melody/D\ folder/surgical\ scene_reconstruction/3.\ csv_files_after_pnp\cam_intrinsics_param"/>
+
+  <node name="Surgical_Scene_Reconstructor" pkg="myproject" type="Surgical_Scene_Reconstructor" output="screen" >
+
+    <param name="CAMERA_COUNT" type="int" value="4" />
+
+    <param name="IMG_FOLDER1" type="str" value="$(arg IMG_DIR)/surgical_scene_kyle/left/" />
+    <param name="IMG_FOLDER2" type="str" value="$(arg IMG_DIR)/surgical_scene_kyle/right/" />
+    <param name="IMG_FOLDER3" type="str" value="$(arg IMG_DIR)/surgical_scene_melody/left/" />
+    <param name="IMG_FOLDER4" type="str" value="$(arg IMG_DIR)/surgical_scene_melody/right/" />
+
+    <param name="TME_STAMP1" type="str" value="$(arg TME_DIR)/experiment_kyle/left_timestamp.csv" />
+    <param name="TME_STAMP2" type="str" value="$(arg TME_DIR)/experiment_kyle/right_timestamp.csv" />
+    <param name="TME_STAMP3" type="str" value="$(arg TME_DIR)/experiment_melody/left_timestamp.csv" />
+    <param name="TME_STAMP4" type="str" value="$(arg TME_DIR)/experiment_melody/right_timestamp.csv" />
+
+    <param name="CAM_POSE1" type="str" value="$(arg POS_DIR)/KCam-l-pose-meat-after-pnp.csv" />
+    <param name="CAM_POSE2" type="str" value="$(arg POS_DIR)/KCam-r-pose-meat-after-pnp.csv" />
+    <param name="CAM_POSE3" type="str" value="$(arg POS_DIR)/MCam-l-pose-meat-after-pnp.csv" />
+    <param name="CAM_POSE4" type="str" value="$(arg POS_DIR)/MCam-r-pose-meat-after-pnp.csv" />
+
+    <param name="CAM_CALI1" type="str" value="$(arg CAL_DIR)/cam_kyle_left.yaml" />
+    <param name="CAM_CALI2" type="str" value="$(arg CAL_DIR)/cam_kyle_right.yaml" />
+    <param name="CAM_CALI3" type="str" value="$(arg CAL_DIR)/cam_melody_left.yaml" />
+    <param name="CAM_CALI4" type="str" value="$(arg CAL_DIR)/cam_melody_right.yaml" />
+
+  </node>
+
+</launch>
