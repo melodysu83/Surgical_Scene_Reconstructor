@@ -119,10 +119,9 @@ bool MyReconstr_Controller::init_ros(int argc, char** argv)
 
 	// Setup Image publish/subscribe relation
 	image_pub_ = it_.advertise("/surgical_scene_reconstr/2D_images", 1); 
-	model_pub_ = nh_.advertise<PointCloud>("/surgical_scene_reconstr/3D_model", 1);
+	model_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/surgical_scene_reconstr/3D_model", 1,true);
 	
 	//ToDo: if allow realtime, need to subscribe to image ros topics
-
 	return true;	
 }
 
@@ -132,7 +131,6 @@ void MyReconstr_Controller::start_thread()
 	pthread_create(&console_thread,NULL,MyReconstr_Controller::static_console_process,this);
 	pthread_create(&io_thread,NULL,MyReconstr_Controller::static_io_process,this);
 	pthread_create(&reconstr_thread,NULL,MyReconstr_Controller::static_reconstr_process,this);
-
 }
 
 
@@ -158,8 +156,8 @@ void *MyReconstr_Controller::console_process()
 	static ros::Rate loop_rate(CONSOLE_LOOP_RATE);
 	while (ros::ok() && !GOODBYE)
   	{
-		
 		loop_rate.sleep();
+		ros::spinOnce();  
 	}
 }
 
@@ -261,12 +259,9 @@ void MyReconstr_Controller::modelPb()
 				string s = ss.str();
 
 				// ref: http://wiki.ros.org/pcl_ros
-				PointCloud::Ptr msg (new PointCloud); 
+				sensor_msgs::PointCloud2::Ptr msg; 
+				toROSMsg(Model3D, *msg);
 				msg->header.frame_id = s.c_str();
-				msg->height = msg->width = 1;
-				
-				// ref: http://docs.pointclouds.org/1.5.1/classpcl_1_1_point_cloud.html
-				msg->points = Model3D.points;
 
 				model_pub_.publish(msg);
 				NEW_MODEL_TO_PUB = false;

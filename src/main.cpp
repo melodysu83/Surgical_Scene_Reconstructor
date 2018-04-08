@@ -16,7 +16,6 @@ int main(int argc, char **argv)
 
         // join the console_thread and ros_thread
         ctrl.join_thread();
-	
         exit(1);
 }
 

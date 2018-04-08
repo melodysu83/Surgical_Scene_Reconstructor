@@ -22,7 +22,7 @@ class MyReconstr_Controller
 		MODEL_STATUS_LIST MODEL_STATE;
 		SYSTEM_STATUS_LIST SYSTEM_STATE;
 
-		PointCloud Model3D;  			
+		PointCloud<PointXYZRGBNormal> Model3D;  			
 		cv_bridge::CvImagePtr Images2D;
 
 		ros::NodeHandle nh_; 

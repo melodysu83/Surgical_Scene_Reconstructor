@@ -8,6 +8,7 @@ project(myproject)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  pcl_ros
   cv_bridge
   image_transport
   roscpp
@@ -17,7 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
   usb_cam
   message_generation
 )
-find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenCV 2 REQUIRED)
 ## System dependencies are found with CMake's conventions
@@ -112,7 +112,7 @@ find_package(OpenCV 2 REQUIRED)
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES myproject
-    CATKIN_DEPENDS cv_bridge image_transport roscpp rospy sensor_msgs std_msgs usb_cam
+    CATKIN_DEPENDS cv_bridge image_transport roscpp rospy sensor_msgs std_msgs usb_cam pcl_ros
     DEPENDS system_lib  
 )
 
@@ -125,7 +125,6 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS} 
-  ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -210,4 +209,4 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS})
 
 add_executable(Surgical_Scene_Reconstructor src/main.cpp src/MyReconstr_Controller.cpp src/MyReconstr_Display.cpp)
-target_link_libraries(Surgical_Scene_Reconstructor ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(Surgical_Scene_Reconstructor ${catkin_LIBRARIES})

@@ -47,28 +47,28 @@ void MyReconstr_Display::display_system_message(int message_code)
 	switch(message_code)
 	{
 		case 0:
-			system("[System Info] Invalid camera count. (Min of 2 required.)");
+			cout<<"[System Info] Invalid camera count. (Min of 2 required.)"<<endl;
 			break;
 		case 1:
-			system("[System Info] Loading ros parameters success!");
+			cout<<"[System Info] Loading ros parameters success!"<<endl;
 			break;
 		case 2:
-			system("[System Info] Loading data from csv files success!"); 
+			cout<<"[System Info] Loading data from csv files success!"<<endl; 
 			break;
 		case 3:
-			system("[System Info] Waiting for ROS initialization..."); 
+			cout<<"[System Info] Waiting for ROS initialization..."<<endl; 
 			break;
 		case 4:
-			system("[System Info] System closing. Joining all active threads.");
+			cout<<"[System Info] System closing. Joining all active threads."<<endl;
 			break;
 		case 5:
-			cout<<"cv_bridge exception: ";
+			cout<<"[System Info] cv_bridge exception: ";
 			break;
 		case 6:
-			system("[System Info] plc::PointCloud exception occurred.");
+			cout<<"[System Info] plc::PointCloud exception occurred."<<endl;
 			break;
 		case 7:
-			system("[System Info] Failed to init ros.");
+			cout<<"[System Info] Failed to init ros."<<endl;
 			break;
 	}
 }

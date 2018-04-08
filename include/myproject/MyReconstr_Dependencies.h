@@ -19,13 +19,21 @@
 
 // dependencies on ros packages
 #include <ros/ros.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl/point_types.h>
 #include <ros/transport_hints.h>
 #include <tf/transform_datatypes.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
+
+//PCL
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/io/ply_io.h>
+#include <pcl_conversions/pcl_conversions.h>
+
+// eliminate the deprecated headers warning
+#define VTK_EXCLUDE_STRSTREAM_HEADERS
+#include <pcl/io/vtk_lib_io.h>
 
 // dependencies on opencv libraries
 #include <opencv2/imgproc/imgproc.hpp>
@@ -69,8 +77,9 @@ enum SYSTEM_STATUS_LIST{
 // namespace declaration
 using namespace std;
 using namespace cv;
-
-// type define
-typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+using namespace ros;
+using namespace pcl;
+using namespace pcl::io;
+using namespace pcl_conversions;
 
 #endif
