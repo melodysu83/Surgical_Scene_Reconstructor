@@ -71,10 +71,10 @@ void MyReconstr_Controller::load_ros_param()
 			strcpy(param_name3, s3.c_str());
 			strcpy(param_name4, s4.c_str());
 
-			nh_.param(param_name1, IMG_FOLDER[i-1]);
-			nh_.param(param_name2, TME_STAMP_FILE[i-1]);
-			nh_.param(param_name3, CAM_POSE_FILE[i-1]);
-			nh_.param(param_name4, CAM_CALI_FILE[i-1]);
+			nh_.param<string>(param_name1, IMG_FOLDER[i-1],"None");
+			nh_.param<string>(param_name2, TME_STAMP_FILE[i-1],"None");
+			nh_.param<string>(param_name3, CAM_POSE_FILE[i-1],"None");
+			nh_.param<string>(param_name4, CAM_CALI_FILE[i-1],"None");
 		}
 		
 		CONSOLE.display_system_message(1);
@@ -87,11 +87,59 @@ void MyReconstr_Controller::load_dataset()
 	for(int i=1; i<=CAMERA_COUNT; i++)
 	{
 		//load timestamp
+		vector<vector<double> > tme_stamp_data;      
+		ifstream tme_stamp_file(TME_STAMP_FILE[i-1].c_str()); 
 		
+		while (tme_stamp_file.good() )
+		{
+			vector<double> row; 
+			string line;
+        		getline(tme_stamp_file, line);
+			if ( !tme_stamp_file.good() )
+            			break;
+			stringstream iss(line);
+			for (int col = 0; col < 3; col++) 
+			{
+				string strval;
+				getline(iss, strval,',');
+				stringstream convertor(strval);
+				double val;
+				convertor >> val;
+				row.push_back(val); 
+			}
+			tme_stamp_data.push_back(row);
+		}
+		TME_STAMP_DATA.push_back(tme_stamp_data);
+
 		//load campose
+		vector<vector<double> > cam_pose_data;      
+		ifstream cam_pose_file(CAM_POSE_FILE[i-1].c_str()); 
 		
+		while (cam_pose_file.good() )
+		{
+			vector<double> row; 
+			string line;
+        		getline(cam_pose_file, line);
+			if ( !cam_pose_file.good() )
+            			break;
+			stringstream iss(line);
+			for (int col = 0; col < 17; col++) 
+			{
+				string strval;
+				getline(iss, strval,',');
+				stringstream convertor(strval);
+				double val;
+				convertor >> val;
+				row.push_back(val); 
+			}
+			cam_pose_data.push_back(row);
+		}
+		CAM_POSE_DATA.push_back(cam_pose_data);
+
 		//load camera calibration parameters
-		
+
+		//output to console
+		CONSOLE.show_csv_data_summary(i,TME_STAMP_DATA[i-1].size(),CAM_POSE_DATA[i-1].size());
 	}
 	CONSOLE.display_system_message(2);
 }
@@ -118,8 +166,8 @@ bool MyReconstr_Controller::init_ros(int argc, char** argv)
 		CONSOLE.display_system_message(3);
 
 	// Setup Image publish/subscribe relation
-	image_pub_ = it_.advertise("/surgical_scene_reconstr/2D_images", 1); 
-	model_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/surgical_scene_reconstr/3D_model", 1,true);
+	image_pub_ = it_.advertise("/Surgical_Scene_Reconstructor/2D_images", 1); 
+	model_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/Surgical_Scene_Reconstructor/3D_model", 1,true);
 	
 	//ToDo: if allow realtime, need to subscribe to image ros topics
 	return true;	

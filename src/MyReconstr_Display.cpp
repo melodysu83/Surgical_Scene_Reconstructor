@@ -47,28 +47,39 @@ void MyReconstr_Display::display_system_message(int message_code)
 	switch(message_code)
 	{
 		case 0:
-			cout<<"[System Info] Invalid camera count. (Min of 2 required.)"<<endl;
+			cout<<endl<<"[System Info] Invalid camera count. (Min of 2 required.)"<<endl<<endl;
 			break;
 		case 1:
-			cout<<"[System Info] Loading ros parameters success!"<<endl;
+			cout<<endl<<"[System Info] Loading ros parameters success!"<<endl<<endl;
 			break;
 		case 2:
-			cout<<"[System Info] Loading data from csv files success!"<<endl; 
+			cout<<endl<<"[System Info] Loading data from csv files success!"<<endl<<endl; 
 			break;
 		case 3:
-			cout<<"[System Info] Waiting for ROS initialization..."<<endl; 
+			cout<<endl<<"[System Info] Waiting for ROS initialization..."<<endl<<endl; 
 			break;
 		case 4:
-			cout<<"[System Info] System closing. Joining all active threads."<<endl;
+			cout<<endl<<"[System Info] System closing. Joining all active threads."<<endl<<endl;
 			break;
 		case 5:
-			cout<<"[System Info] cv_bridge exception: ";
+			cout<<endl<<"[System Info] cv_bridge exception: ";
 			break;
 		case 6:
-			cout<<"[System Info] plc::PointCloud exception occurred."<<endl;
+			cout<<endl<<"[System Info] plc::PointCloud exception occurred."<<endl<<endl;
 			break;
 		case 7:
-			cout<<"[System Info] Failed to init ros."<<endl;
+			cout<<endl<<"[System Info] Failed to init ros."<<endl<<endl;
 			break;
 	}
 }
+
+
+void MyReconstr_Display::show_csv_data_summary(int cam_idx, int img_count, int poses_count)
+{
+	cout<<"camera"<<cam_idx<<":"<<endl;
+	cout<<"    TME_STAMP_DATA: "<<img_count<<" images"<<endl;
+	cout<<"    CAM_POSE_DATA:  "<<poses_count<<" poses"<<endl;
+}
+
+
+

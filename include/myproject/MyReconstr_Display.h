@@ -13,6 +13,7 @@ class MyReconstr_Display
 		int get_key();
 		void set_camera_count(int);
 		void display_system_message(int);
+		void show_csv_data_summary(int,int,int);
 };
 
 #endif

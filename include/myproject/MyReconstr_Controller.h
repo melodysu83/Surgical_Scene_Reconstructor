@@ -10,6 +10,9 @@ class MyReconstr_Controller
 		string* CAM_POSE_FILE;
 		string* CAM_CALI_FILE;
 
+		vector<vector<vector<double> > > TME_STAMP_DATA;
+		vector<vector<vector<double> > > CAM_POSE_DATA;
+
 		int CAMERA_COUNT;
 		int IMAGE_PUB_COUNT;
 		int MODEL_PUB_COUNT;
