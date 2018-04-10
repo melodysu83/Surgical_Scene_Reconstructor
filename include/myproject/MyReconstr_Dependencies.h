@@ -43,6 +43,15 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/core/utility.hpp"
 
+#define ROS_PARAMETER_NAME0 "/Surgical_Scene_Reconstructor/CAMERA_COUNT"
+#define ROS_PARAMETER_NAME1 "/Surgical_Scene_Reconstructor/IMG_FOLDER"
+#define ROS_PARAMETER_NAME2 "/Surgical_Scene_Reconstructor/TME_STAMP"
+#define ROS_PARAMETER_NAME3 "/Surgical_Scene_Reconstructor/CAM_POSE"
+#define ROS_PARAMETER_NAME4 "/Surgical_Scene_Reconstructor/CAM_CALI"
+
+#define ROS_TOPIC_PUBLISH_NAME1 "/Surgical_Scene_Reconstructor/2D_images"
+#define ROS_TOPIC_PUBLISH_NAME2 "/Surgical_Scene_Reconstructor/3D_model"
+
 #define CONSOLE_LOOP_RATE   10     // in Hz
 #define IO_LOOP_RATE        30     // in Hz
 

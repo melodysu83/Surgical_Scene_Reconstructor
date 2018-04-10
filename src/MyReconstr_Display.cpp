@@ -70,6 +70,12 @@ void MyReconstr_Display::display_system_message(int message_code)
 		case 7:
 			cout<<endl<<"[System Info] Failed to init ros."<<endl<<endl;
 			break;
+		case 8:
+			cout<<endl<<"[System Info] Camera index out of scope. (Range = 1~"<<CAMERA_COUNT<<")"<<endl<<endl;
+			break;
+		case 9:
+			cout<<endl<<"[System Info] Ros parameter value extraction error."<<endl<<endl;
+			break;
 	}
 }
 

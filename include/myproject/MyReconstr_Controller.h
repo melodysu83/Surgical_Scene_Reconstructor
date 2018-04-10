@@ -1,20 +1,10 @@
 #ifndef MYRECONSTR_CONTROLLER_H
 #define MYRECONSTR_CONTROLLER_H
 
-#include "myproject/MyReconstr_Display.h"
+#include "myproject/MyReconstr_Storage.h"
 class MyReconstr_Controller
 {
 	private:		
-		string* IMG_FOLDER;
-		string* TME_STAMP_FILE;
-		string* CAM_POSE_FILE;
-		string* CAM_CALI_FILE;
-
-		vector<vector<vector<double> > > TME_STAMP_DATA;
-		vector<vector<vector<double> > > CAM_POSE_DATA;
-		vector<cv::Mat> CALI_INTRI_DATA;
-		vector<cv::Mat> CALI_DISTO_DATA;
-
 		int CAMERA_COUNT;
 		int IMAGE_PUB_COUNT;
 		int MODEL_PUB_COUNT;
@@ -40,7 +30,7 @@ class MyReconstr_Controller
 		pthread_t reconstr_thread;	// do 3D reconstruction
 
 		MyReconstr_Display CONSOLE;
-
+		MyReconstr_Storage DATABANK;
 	public:
 		MyReconstr_Controller(int argc, char** argv);
 		~MyReconstr_Controller();
