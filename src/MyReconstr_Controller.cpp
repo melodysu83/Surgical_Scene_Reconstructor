@@ -86,7 +86,7 @@ void MyReconstr_Controller::load_dataset()
 {
 	for(int i=1; i<=CAMERA_COUNT; i++)
 	{
-		//load timestamp
+		// load timestamp
 		vector<vector<double> > tme_stamp_data;      
 		ifstream tme_stamp_file(TME_STAMP_FILE[i-1].c_str()); 
 		
@@ -111,7 +111,7 @@ void MyReconstr_Controller::load_dataset()
 		}
 		TME_STAMP_DATA.push_back(tme_stamp_data);
 
-		//load campose
+		// load campose
 		vector<vector<double> > cam_pose_data;      
 		ifstream cam_pose_file(CAM_POSE_FILE[i-1].c_str()); 
 		
@@ -136,10 +136,88 @@ void MyReconstr_Controller::load_dataset()
 		}
 		CAM_POSE_DATA.push_back(cam_pose_data);
 
-		//load camera calibration parameters
+		// load camera calibration parameters
+		size_t start,end;
+		ifstream cam_cali_file(CAM_CALI_FILE[i-1].c_str());// this is good!
+		
+		stringstream buffer;
+		string buf,cam_cali_string,data1,data2;
+		vector<string> tokens1;
+		vector<string> tokens2;
 
-		//output to console
-		CONSOLE.show_csv_data_summary(i,TME_STAMP_DATA[i-1].size(),CAM_POSE_DATA[i-1].size());
+		string target1 = "data: [";
+		string target2 = "]\n";
+
+		buffer << cam_cali_file.rdbuf();
+		cam_cali_string = buffer.str();
+
+		start = cam_cali_string.find(target1); // this is where intrinsic is
+		if (start!=string::npos)
+		{
+			end = cam_cali_string.find(target2.c_str(),start+1);
+			data1 = cam_cali_string.substr(start+7, end-start-7); // string.substr(starting_index, length_of_sub_string)
+		}
+		else
+			CONSOLE.no_valid_camera_info_file(1,start,end);
+
+		start = cam_cali_string.find(target1.c_str(),end+1); // this is where distortion is
+		if (start!=string::npos)
+		{
+			end = cam_cali_string.find(target2.c_str(),start+1);
+			data2 = cam_cali_string.substr(start+7, end-start-7); // string.substr(starting_index, length_of_sub_string)
+		}
+		else
+			CONSOLE.no_valid_camera_info_file(2,start,end);
+
+		stringstream ss1(data1);
+		if(cam_cali_file.is_open())
+		{	
+			while (ss1 >> buf)
+				tokens1.push_back(buf.substr(0,buf.length()-1));
+		}
+		else
+			CONSOLE.no_valid_camera_info_file(3,start,end);
+
+		stringstream ss2(data2);
+		if(cam_cali_file.is_open())
+		{	
+			while (ss2 >> buf)
+				tokens2.push_back(buf.substr(0,buf.length()-1));
+		}
+		else
+			CONSOLE.no_valid_camera_info_file(3,start,end);
+
+		float distortion_data[5] = { 0,0,0,0,0};
+		float intrinsic_data[9] = { 0,0,0,0,0,0,0,0,0};
+
+		if(tokens1.size() == 9)
+		{
+			stringstream convertor1_0(tokens1[0]);	stringstream convertor1_1(tokens1[1]);	stringstream convertor1_2(tokens1[2]);
+			stringstream convertor1_3(tokens1[3]);	stringstream convertor1_4(tokens1[4]);	stringstream convertor1_5(tokens1[5]);
+			stringstream convertor1_6(tokens1[6]);	stringstream convertor1_7(tokens1[7]);	stringstream convertor1_8(tokens1[8]);
+			convertor1_0 >> intrinsic_data[0];	convertor1_1 >> intrinsic_data[1];	convertor1_2 >> intrinsic_data[2];
+			convertor1_3 >> intrinsic_data[3];	convertor1_4 >> intrinsic_data[4];	convertor1_5 >> intrinsic_data[5];
+			convertor1_6 >> intrinsic_data[6];	convertor1_7 >> intrinsic_data[7];	convertor1_8 >> intrinsic_data[8];
+		}
+		if(tokens2.size() == 5)
+		{
+			stringstream convertor2_0(tokens2[0]);	stringstream convertor2_1(tokens2[1]);	stringstream convertor2_2(tokens2[2]);
+			stringstream convertor2_3(tokens2[3]);	stringstream convertor2_4(tokens2[4]);
+			convertor2_0 >> distortion_data[0];	convertor2_1 >> distortion_data[1];	convertor2_2 >> distortion_data[2];	
+			convertor2_3 >> distortion_data[3];	convertor2_4 >> distortion_data[4];	
+		}
+
+		cv::Mat distortion = cv::Mat(1,5,CV_32F,distortion_data);
+		cv::Mat intrinsic = cv::Mat(3,3,CV_32F,intrinsic_data);
+		
+		cv::Mat emptyMat;
+		CALI_INTRI_DATA.push_back(emptyMat);
+		CALI_DISTO_DATA.push_back(emptyMat);
+		CALI_INTRI_DATA[i-1] = intrinsic.clone();
+		CALI_DISTO_DATA[i-1] = distortion.clone();
+
+		// output to console
+		CONSOLE.show_csv_data_summary(i,TME_STAMP_DATA[i-1].size(),CAM_POSE_DATA[i-1].size(),CALI_INTRI_DATA[i-1],CALI_DISTO_DATA[i-1]);
 	}
 	CONSOLE.display_system_message(2);
 }

@@ -13,7 +13,8 @@ class MyReconstr_Display
 		int get_key();
 		void set_camera_count(int);
 		void display_system_message(int);
-		void show_csv_data_summary(int,int,int);
+		void show_csv_data_summary(int,int,int,cv::Mat,cv::Mat);
+		void no_valid_camera_info_file(int,int,int);
 };
 
 #endif

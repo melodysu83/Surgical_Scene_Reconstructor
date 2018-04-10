@@ -12,6 +12,8 @@ class MyReconstr_Controller
 
 		vector<vector<vector<double> > > TME_STAMP_DATA;
 		vector<vector<vector<double> > > CAM_POSE_DATA;
+		vector<cv::Mat> CALI_INTRI_DATA;
+		vector<cv::Mat> CALI_DISTO_DATA;
 
 		int CAMERA_COUNT;
 		int IMAGE_PUB_COUNT;
