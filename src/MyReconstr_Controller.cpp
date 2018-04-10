@@ -125,21 +125,18 @@ void *MyReconstr_Controller::console_process()
 
 void *MyReconstr_Controller::io_process()
 {
+	double system_timer = 0.00;
 	static ros::Rate loop_rate(IO_LOOP_RATE);
 	while (ros::ok() && !GOODBYE)
   	{
-		/*
-		cout<<"Hello world hi there! boooo"<<endl;
-		Mat img_raw;
-		img_raw = imread("/media/melody/D\ folder/surgical\ scene_reconstruction/3.\ image_files_processed/surgical_scene_melody/left/05986.png");
-		namedWindow( "booo", WINDOW_AUTOSIZE ); // Create a window for display.
-		while(1)
-		{
-			imshow("booo",img_raw);
-			cv::waitKey(0);
-		        usleep(3000000); //3 secs
-		}
-		*/
+		//load current images/pose
+		load_currect_images_and_pose(system_timer);
+
+		// update system time
+		system_timer = system_timer+0.01; //ToDo: Find a way to determine termination
+		
+		//ToDo: publish to image2D
+
 		ros::spinOnce();   // ensures that the callback gets called
 		loop_rate.sleep();
 	}
@@ -151,7 +148,7 @@ void *MyReconstr_Controller::reconstr_process()
 	while (ros::ok() && !GOODBYE)
   	{
 		
-		
+		//ToDo: publish to model3D
 	}
 }
 
@@ -173,6 +170,18 @@ void * MyReconstr_Controller::static_reconstr_process(void* classRef)
 	return ((MyReconstr_Controller *)classRef)->reconstr_process();
 }
 
+
+void MyReconstr_Controller::load_currect_images_and_pose(double system_time) //ToDo!!!! replace with real stuff
+{
+	
+	cout<<"Hello world hi there! boooo"<<endl;
+	Mat img_raw;
+	img_raw = imread(DATABANK.get_img_folder_name(3)+"05986.png");
+	namedWindow( "booo", WINDOW_AUTOSIZE ); // Create a window for display.
+	imshow("booo",img_raw);
+	cv::waitKey(0);
+	
+}
 
 void MyReconstr_Controller::imagePb() 
 {

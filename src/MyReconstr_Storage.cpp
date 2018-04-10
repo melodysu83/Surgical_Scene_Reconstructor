@@ -28,6 +28,26 @@ void MyReconstr_Storage::set_camera_count(int cam_cnt)
 }
 
 
+void MyReconstr_Storage::set_ros_param_val(int cam_idx, vector<string> param_val)
+{
+	if(cam_idx > CAMERA_COUNT || cam_idx < 1)
+	{
+		CONSOLE.display_system_message(8);
+		exit(1);
+	}
+	else if(param_val.size() != 4)
+	{
+		CONSOLE.display_system_message(9);
+		exit(1);
+	}
+	
+	IMG_FOLDER[cam_idx-1] = param_val[0];
+	TME_STAMP_FILE[cam_idx-1] = param_val[1];
+	CAM_POSE_FILE[cam_idx-1] = param_val[2];
+	CAM_CALI_FILE[cam_idx-1] = param_val[3];
+}
+
+
 vector<char*> MyReconstr_Storage::get_ros_param_name(int cam_idx)
 {
 	if(cam_idx > CAMERA_COUNT || cam_idx < 1)
@@ -68,23 +88,16 @@ vector<char*> MyReconstr_Storage::get_ros_param_name(int cam_idx)
 }
 
 
-void MyReconstr_Storage::set_ros_param_val(int cam_idx, vector<string> param_val)
+string MyReconstr_Storage::get_img_folder_name(int cam_idx)
 {
 	if(cam_idx > CAMERA_COUNT || cam_idx < 1)
 	{
 		CONSOLE.display_system_message(8);
 		exit(1);
 	}
-	else if(param_val.size() != 4)
-	{
-		CONSOLE.display_system_message(9);
-		exit(1);
-	}
-	
-	IMG_FOLDER[cam_idx-1] = param_val[0];
-	TME_STAMP_FILE[cam_idx-1] = param_val[1];
-	CAM_POSE_FILE[cam_idx-1] = param_val[2];
-	CAM_CALI_FILE[cam_idx-1] = param_val[3];
+
+	string str = IMG_FOLDER[cam_idx-1];
+	return str;
 }
 
 

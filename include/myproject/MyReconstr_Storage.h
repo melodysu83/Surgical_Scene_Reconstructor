@@ -22,8 +22,9 @@ class MyReconstr_Storage
 		MyReconstr_Storage();
 		~MyReconstr_Storage();
 		void set_camera_count(int);
-		vector<char*> get_ros_param_name(int);
 		void set_ros_param_val(int,vector<string>);
+		vector<char*> get_ros_param_name(int);
+		string get_img_folder_name(int);
 		void load_dataset();
 		void verify_loaded_dataset();
 };

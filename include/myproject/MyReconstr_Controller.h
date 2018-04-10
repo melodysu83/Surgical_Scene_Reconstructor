@@ -51,6 +51,8 @@ class MyReconstr_Controller
 		static void *static_io_process(void*);
 		static void *static_reconstr_process(void*);
 
+		void load_currect_images_and_pose(double);
+		
 		void modelPb();
 		void imagePb();
 };
