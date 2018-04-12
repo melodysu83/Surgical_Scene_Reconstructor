@@ -76,6 +76,9 @@ void MyReconstr_Display::display_system_message(int message_code)
 		case 9:
 			cout<<endl<<"[System Info] Ros parameter value extraction error."<<endl<<endl;
 			break;
+		case 10:
+			cout<<endl<<"[System Info] Camera pose retrieval fail. Number of specified time entries and camera count don't match."<<endl<<endl;
+			break;
 	}
 }
 
@@ -112,3 +115,39 @@ void MyReconstr_Display::no_valid_camera_info_file(int topic,int start,int end)
 }
 
 
+void MyReconstr_Display::get_data_error(int message_code)
+{
+	switch(message_code)
+	{
+		case 0:
+			cout<<endl<<"[Data Warning] All specified times are invalid during camera pose extraction."<<endl<<endl;
+			break;
+		case 1:
+			cout<<endl<<"[Data Warning] One specified time is invalid during camera pose extraction."<<endl<<endl;
+			break;
+		case 2:
+			cout<<endl<<"[Data Warning] Data corruption! The camera pose does not have the right size."<<endl<<endl; 
+			break;
+		case 3:
+			cout<<endl<<"[Data Warning] Requested image index out of bound."<<endl<<endl; 
+			break;
+		case 4:
+			cout<<endl<<"[Data Warning] Requested image index will be out of bound. Please wrap up the reconstruction process soon."<<endl<<endl;
+			break;
+		case 5:
+			cout<<endl<<"[Data Warning] Image retrival error. Specified time should be non negative."<<endl<<endl;
+			break;
+		case 6:
+			cout<<endl<<"[Data Warning] Image retrival error. Specified time exceeded maximum time."<<endl<<endl;
+			break;
+		case 7:
+			cout<<endl<<"[Data Warning] One requested image index invalid, replaced with blank image."<<endl<<endl;
+			break;
+		case 8:
+			cout<<endl<<"[Data Warning] All requested image index invalid. There is something wrong with the system."<<endl<<endl;
+			break;
+		case 9:
+			cout<<endl<<"[Data Warning] Retrieved images and camera count don't match."<<endl<<endl;
+			break;
+	}
+}

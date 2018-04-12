@@ -3,6 +3,7 @@
 MyReconstr_Storage::MyReconstr_Storage()
 {
 	CAMERA_COUNT = 0;
+	SYSTEM_TIME = 0;
 }
 
 
@@ -15,6 +16,8 @@ void MyReconstr_Storage::set_camera_count(int cam_cnt)
 {
 	// CAMERA_COUNT: the number of camera viewpoints    
 	this->CAMERA_COUNT = cam_cnt;
+	CURRENT_IMAGES_INDEX.assign(cam_cnt,-1);
+
 	CONSOLE.set_camera_count(cam_cnt);
 
 	// IMG_FOLDER: the folders that store images from each camera
@@ -249,4 +252,211 @@ void MyReconstr_Storage::verify_loaded_dataset()
 }
 
 
+void MyReconstr_Storage::set_system_time(double system_time)
+{
+	this->SYSTEM_TIME = system_time;
+}
+
+
+vector<cv::Mat> MyReconstr_Storage::get_current_images() //ToDo: check logic redundancy
+{
+	int out_of_bound_count = 0;
+	vector<cv::Mat> current_images;
+	double time_now = (this->SYSTEM_TIME);
+
+	for(int i=0; i<CAMERA_COUNT; i++)
+	{
+		int row = CURRENT_IMAGES_INDEX[i];
+		int row_max = TME_STAMP_DATA[i].size();
+
+		// (1) filter out weird system time
+		if(time_now < 0)
+		{
+			CONSOLE.get_data_error(5); // Invalid time range
+			break;
+			exit(1);
+		}
+		else if(time_now > TME_STAMP_DATA[i][row_max-1][TIME_STAMP_COL])
+		{
+			CONSOLE.get_data_error(6); // Running out of time
+			break;
+			//ToDo: wrap up processing reconstruction	
+		}
+
+		// (2) find image index
+		if(row == -1) // Case 1: first entry. Need to do binary search.
+		{
+			row = current_image_index_binary_search(i,0,row_max-1); // cam_idx, row_start,row_end
+		}
+		else          // Case 2: Start searching from previous index.
+		{
+			if((row+1 < row_max) && (time_now <= TME_STAMP_DATA[i][row+1][TIME_STAMP_COL]))
+			{
+				row = current_image_index_find_closest(i,row);
+			}
+			else if((row+2 < row_max) && (time_now <= TME_STAMP_DATA[i][row+2][TIME_STAMP_COL]))
+			{
+				row = current_image_index_find_closest(i,row+1);
+			}
+			else
+			{
+				row = current_image_index_binary_search(i,row,row_max-1); 
+			}
+		}
+		CURRENT_IMAGES_INDEX[i] = row;
+
+		if(CURRENT_IMAGES_INDEX[i] == -1)
+		{
+			CONSOLE.get_data_error(7);  
+			cv::Mat img_curr = Mat(IMAGE_H,IMAGE_W, CV_64F, double(0));
+			current_images.push_back(img_curr.clone());
+			out_of_bound_count = out_of_bound_count+1;			
+		}
+		else
+		{
+			std::ostringstream ss;
+    			ss << std::setw(IMAGE_FILE_DIGITS) << std::setfill( '0' ) << CURRENT_IMAGES_INDEX[i];
+			cv::Mat img_curr = imread(get_img_folder_name(i+1)+ss.str()+".png");
+			current_images.push_back(img_curr.clone());
+		}
+	}
+
+	if(out_of_bound_count == CAMERA_COUNT)
+	{
+		CONSOLE.get_data_error(8);  // all images are not in valid time range.
+		exit(1);
+	}
+
+	if(current_images.size() != this->CAMERA_COUNT)
+		CONSOLE.get_data_error(9);
+
+	return current_images;
+}
+
+
+vector<cv::Mat> MyReconstr_Storage::get_current_images(double system_time)
+{
+	set_system_time(system_time);
+	vector<cv::Mat>  current_images = get_current_images();
+	return current_images;
+}
+
+
+vector<vector<double> > MyReconstr_Storage::get_current_cam_poses(bool USE_IMAGE_CAPTURED_TIME)
+{
+	vector<double> specified_time;
+	vector<vector<double> > camera_poses(CAMERA_COUNT,vector<double>(CAM_POSE_SIZE));
+	
+	if(USE_IMAGE_CAPTURED_TIME)
+	{	
+		for(int i=0; i<CAMERA_COUNT;i++)
+			specified_time.push_back(TME_STAMP_DATA[i][CURRENT_IMAGES_INDEX[i]][TIME_STAMP_COL]);
+
+		camera_poses = get_current_cam_poses(specified_time);
+	}
+	else
+	{
+		specified_time.assign(CAMERA_COUNT,this->SYSTEM_TIME);
+		camera_poses = get_current_cam_poses(specified_time);
+	}
+	return camera_poses;
+}
+
+
+vector<vector<double> > MyReconstr_Storage::get_current_cam_poses(vector<double> specified_time)
+{
+	int out_of_bound_count = 0;
+	vector<vector<double> > camera_poses(CAMERA_COUNT,vector<double>(CAM_POSE_SIZE));
+
+	if(specified_time.size() != CAMERA_COUNT)
+	{
+		CONSOLE.display_system_message(10);
+		exit(1);
+	}
+
+	for(int i=0; i<CAMERA_COUNT; i++)
+	{
+		int row = rint(specified_time[i]/TIME_STEP_SIZE);
+		if(row<0 || row>=CAM_POSE_DATA[i].size())
+		{
+			CONSOLE.get_data_error(1);  
+			camera_poses[i].assign(CAM_POSE_SIZE,0.0);  // 16 doubles with a value of 0.0
+			out_of_bound_count = out_of_bound_count+1;
+		}
+		else
+		{
+			if(CAM_POSE_DATA[i][row].size() == CAM_POSE_SIZE+1)
+			{
+				for(int col=0; col<CAM_POSE_SIZE; col++)
+					camera_poses[i][col] = CAM_POSE_DATA[i][row][col+1];
+			}
+			else
+			{
+				CONSOLE.get_data_error(2); // something wrong with data
+				exit(1);
+			}
+		}
+	}
+
+	if(out_of_bound_count == CAMERA_COUNT)
+	{	
+		CONSOLE.get_data_error(0);  // all camera poses are not in valid time range.
+		exit(1);
+	}
+
+	return camera_poses;
+}
+
+
+int MyReconstr_Storage::current_image_index_binary_search(int cam_idx,int row_start,int row_end)
+{
+	int row;
+	int row_test;
+	double time_now = (this->SYSTEM_TIME);
+
+	while( row_end-row_start > 1)
+	{
+		row_test = rint(0.5*(row_start+row_end));
+		if(TME_STAMP_DATA[cam_idx][row_test][TIME_STAMP_COL] > time_now)
+			row_end = row_test;
+		else
+			row_start = row_test;
+	}
+	
+	row = current_image_index_find_closest(cam_idx,row_start);
+
+	return row;
+}
+
+
+int MyReconstr_Storage::current_image_index_find_closest(int cam_idx,int row_prev)
+{
+	int row;
+	int row_max = TME_STAMP_DATA[cam_idx].size();
+	double time_now = (this->SYSTEM_TIME);
+
+	if(row_prev<row_max && row_prev+1<row_max)
+	{
+		double time_prev = TME_STAMP_DATA[cam_idx][row_prev][TIME_STAMP_COL];
+		double time_next = TME_STAMP_DATA[cam_idx][row_prev+1][TIME_STAMP_COL];
+
+		if(time_now-time_prev > time_next-time_now || time_prev < 0)
+			row = row_prev+1;
+		else
+			row = row_prev;
+	}
+	else if(row_prev>=row_max)
+	{
+		row = -1;
+		CONSOLE.get_data_error(3);
+		exit(1);
+	}
+	else
+	{
+		row = row_prev;
+		CONSOLE.get_data_error(4);
+	}
+
+	return row;
+}
 

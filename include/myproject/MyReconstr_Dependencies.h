@@ -55,6 +55,13 @@
 #define CONSOLE_LOOP_RATE   10     // in Hz
 #define IO_LOOP_RATE        30     // in Hz
 
+#define CAM_POSE_SIZE       16     // number of entries of T matrix
+#define TIME_STEP_SIZE	    0.01   // in sec
+#define TIME_STAMP_COL	    2      // the column number in timestamp file that's in use
+
+#define IMAGE_H		    480    // image height
+#define IMAGE_W		    640    // image width
+#define IMAGE_FILE_DIGITS   5      // number of digits in the image files names
 
 enum IMAGE_STATUS_LIST{
 	IMAGE_EMPTY,       // 0

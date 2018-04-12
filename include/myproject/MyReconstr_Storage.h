@@ -6,6 +6,7 @@ class MyReconstr_Storage
 {
 	private:		
 		int CAMERA_COUNT;
+		double SYSTEM_TIME;
 
 		string* IMG_FOLDER;
 		string* TME_STAMP_FILE;
@@ -17,6 +18,8 @@ class MyReconstr_Storage
 		vector<cv::Mat> CALI_INTRI_DATA;
 		vector<cv::Mat> CALI_DISTO_DATA;
 
+		vector<int> CURRENT_IMAGES_INDEX;
+
 		MyReconstr_Display CONSOLE;
 	public:
 		MyReconstr_Storage();
@@ -27,6 +30,14 @@ class MyReconstr_Storage
 		string get_img_folder_name(int);
 		void load_dataset();
 		void verify_loaded_dataset();
+
+		void set_system_time(double);
+		vector<cv::Mat> get_current_images();		       		// internal processing
+		vector<cv::Mat> get_current_images(double);	       		// external call
+		vector<vector<double> > get_current_cam_poses(bool);   		// external call
+		vector<vector<double> > get_current_cam_poses(vector<double>); 	// internal processing
+		int current_image_index_binary_search(int,int,int);
+		int current_image_index_find_closest(int,int);
 };
 
 #endif

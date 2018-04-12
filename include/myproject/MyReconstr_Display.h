@@ -15,6 +15,7 @@ class MyReconstr_Display
 		void display_system_message(int);
 		void show_csv_data_summary(int,int,int,cv::Mat,cv::Mat);
 		void no_valid_camera_info_file(int,int,int);
+		void get_data_error(int);
 };
 
 #endif

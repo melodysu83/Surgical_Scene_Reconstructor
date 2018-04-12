@@ -2,7 +2,6 @@
 
 MyReconstr_Controller::MyReconstr_Controller(int argc, char** argv):it_(nh_)
 {
-	
 	load_ros_param();  // load ROS parameters from launch file	
 	load_dataset();	   // load the dataset from the csv and yaml files
 
@@ -42,7 +41,6 @@ void MyReconstr_Controller::load_ros_param()
 			for(int j=0; j<4; j++)
 				nh_.param<string>(param_name[j], param_val[j],"None");
 			
-		
 			DATABANK.set_ros_param_val(i,param_val);
 		}
 		
@@ -129,10 +127,10 @@ void *MyReconstr_Controller::io_process()
 	static ros::Rate loop_rate(IO_LOOP_RATE);
 	while (ros::ok() && !GOODBYE)
   	{
-		//load current images/pose
+		// (1) load current images/pose
 		load_currect_images_and_pose(system_timer);
 
-		// update system time
+		// (2) update system time
 		system_timer = system_timer+0.01; //ToDo: Find a way to determine termination
 		
 		//ToDo: publish to image2D
@@ -173,13 +171,34 @@ void * MyReconstr_Controller::static_reconstr_process(void* classRef)
 
 void MyReconstr_Controller::load_currect_images_and_pose(double system_time) //ToDo!!!! replace with real stuff
 {
+	static int last_time = 0;
 	
+	// (1) load images
+	vector<cv::Mat> CURRENT_IMAGES = DATABANK.get_current_images(system_time);
+
+	// (2) load cam poses (Note: the order matters!)
+	vector<vector<double> > CURRENT_CAM_POSES = DATABANK.get_current_cam_poses(true);
+
+	// display the data once every second
+	if(rint(system_time) != last_time)
+	{
+		cout<<"system time:"<<system_time<<endl;
+		for(int i=0;i<CAMERA_COUNT;i++)
+		{
+			cout<<"cam_pose_"<<i<<": "<<CURRENT_CAM_POSES[i][3]<<"    "<<CURRENT_CAM_POSES[i][7]<<"    "<<CURRENT_CAM_POSES[i][11]<<endl;
+		}
+		cout<<endl;
+		last_time = rint(system_time);
+	}
+
+	/*
 	cout<<"Hello world hi there! boooo"<<endl;
 	Mat img_raw;
 	img_raw = imread(DATABANK.get_img_folder_name(3)+"05986.png");
 	namedWindow( "booo", WINDOW_AUTOSIZE ); // Create a window for display.
 	imshow("booo",img_raw);
 	cv::waitKey(0);
+	*/
 	
 }
 
