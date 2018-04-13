@@ -284,17 +284,14 @@ void *MyReconstr_Controller::reconstr_process()
 				// ToDo: Replace the following baby script with real stuff!
 				// ref: http://docs.pointclouds.org/trunk/classpcl_1_1_point_cloud.html
 
-				int num_of_pts = 2;
 				Model3D.clear(); // Removes all points in a cloud and sets the width and height to 0. 
-				Model3D.points.resize (num_of_pts);
-				Model3D.width = num_of_pts;
-				Model3D.height = 1;
 				PointXYZRGB pt1, pt2;
-				pt1.x = 1;	pt1.y = 2;	pt1.z = 5;	pt1.r = 100;	pt1.g = 200;	pt1.b = 125;
-				pt2.x = 1;	pt2.y = 0.7;	pt2.z = 5;  	pt2.r = 123;	pt2.g = 12;	pt2.b = 50;
+				pt1.x = 1;	pt1.y = 2;	pt1.z = 50;	pt1.r = 100;	pt1.g = 100;	pt1.b = 125;
+				pt2.x = 1;	pt2.y = 57;	pt2.z = 5;  	pt2.r = 223;	pt2.g = 12;	pt2.b = 50;
 				Model3D.points.push_back(pt1);
 				Model3D.points.push_back(pt2);
-
+				// to access each point: Model3D.points[0], Model3D.points[1]
+				
 				// (5) set flags
 				this->NEW_MODEL_TO_PUB = true;
 				this->MODEL_STATE = MODEL_DONE_PROCESSING;
