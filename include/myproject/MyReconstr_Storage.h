@@ -7,6 +7,7 @@ class MyReconstr_Storage
 	private:		
 		int CAMERA_COUNT;
 		double SYSTEM_TIME;
+		bool DATA_END_FLAG;
 
 		string* IMG_FOLDER;
 		string* TME_STAMP_FILE;
@@ -32,6 +33,8 @@ class MyReconstr_Storage
 		void verify_loaded_dataset();
 
 		void set_system_time(double);
+		bool check_data_ending();
+		void reset_data_pointers();
 		vector<cv::Mat> get_current_images();		       		// internal processing
 		vector<cv::Mat> get_current_images(double);	       		// external call
 		vector<vector<double> > get_current_cam_poses(bool);   		// external call

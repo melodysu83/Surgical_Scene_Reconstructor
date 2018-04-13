@@ -22,11 +22,13 @@
 #include <ros/transport_hints.h>
 #include <tf/transform_datatypes.h>
 #include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 
 //PCL
 #include <pcl/point_cloud.h>
+#include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/ply_io.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -51,6 +53,7 @@
 
 #define ROS_TOPIC_PUBLISH_NAME1 "/Surgical_Scene_Reconstructor/2D_images"
 #define ROS_TOPIC_PUBLISH_NAME2 "/Surgical_Scene_Reconstructor/3D_model"
+#define OPENCV_IMSHOW_WINDOW_NAME "My Image"
 
 #define CONSOLE_LOOP_RATE   10     // in Hz
 #define IO_LOOP_RATE        30     // in Hz
@@ -74,7 +77,7 @@ enum IMAGE_STATUS_LIST{
 };
 
 enum MODEL_STATUS_LIST{
-	MODEL_EMPTY,       // 0
+	MODEL_EMPTY,       	 // 0
 	MODEL_START_PROCESSING,  // 1
 	MODEL_DONE_PROCESSING,   // 2
 	MODEL_START_PUBLISHING,  // 3
@@ -85,9 +88,11 @@ enum SYSTEM_STATUS_LIST{
 	SYSTEM_JUST_STARTING,                   // 0
 	SYSTEM_SHOW_MENU,                       // 1
 	SYSTEM_PENDING_USER_SELECTION,          // 2
-	SYSTEM_CAMERA_CALIBRATE_MODE,           // 3
-	SYSTEM_CAMERA_CALIBRATE_PNP_READY_MODE, // 4
-	SYSTEM_EXIT_ALL,                        // 5
+	SYSTEM_DATA_DISPLAY_MODE,	        // 3
+	SYSTEM_RECONSTR_QUIET_MODE, 		// 4
+	SYSTEM_RECONSTR_DEBUG_MODE,		// 5
+	SYSTEM_DATA_ENDING,			// 6
+	SYSTEM_EXIT_ALL,                        // 7
 };
 
 // namespace declaration

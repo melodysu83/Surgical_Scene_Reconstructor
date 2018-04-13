@@ -2,8 +2,9 @@
 
 MyReconstr_Storage::MyReconstr_Storage()
 {
-	CAMERA_COUNT = 0;
-	SYSTEM_TIME = 0;
+	this->CAMERA_COUNT = 0;
+	this->SYSTEM_TIME = 0;
+	this->DATA_END_FLAG = false;
 }
 
 
@@ -258,7 +259,28 @@ void MyReconstr_Storage::set_system_time(double system_time)
 }
 
 
-vector<cv::Mat> MyReconstr_Storage::get_current_images() //ToDo: check logic redundancy
+bool MyReconstr_Storage::check_data_ending()
+{
+	bool check = DATA_END_FLAG;
+	return check;
+}
+
+
+void MyReconstr_Storage::reset_data_pointers()
+{
+	
+	this->DATA_END_FLAG = false;
+	this->SYSTEM_TIME = 0.0;
+
+	CONSOLE.reset_data_pointers();
+
+	for(int i=0; i<CAMERA_COUNT; i++)
+		CURRENT_IMAGES_INDEX[i] = -1;
+	
+}
+
+
+vector<cv::Mat> MyReconstr_Storage::get_current_images()
 {
 	int out_of_bound_count = 0;
 	vector<cv::Mat> current_images;
@@ -279,8 +301,8 @@ vector<cv::Mat> MyReconstr_Storage::get_current_images() //ToDo: check logic red
 		else if(time_now > TME_STAMP_DATA[i][row_max-1][TIME_STAMP_COL])
 		{
 			CONSOLE.get_data_error(6); // Running out of time
-			break;
-			//ToDo: wrap up processing reconstruction	
+			this->DATA_END_FLAG = true;
+			break;	
 		}
 
 		// (2) find image index

@@ -8,8 +8,11 @@ class MyReconstr_Controller
 		int CAMERA_COUNT;
 		int IMAGE_PUB_COUNT;
 		int MODEL_PUB_COUNT;
+		double SYSTEM_TIME;
 
 		bool GOODBYE;
+		bool USER_INPUT_PAUSE;
+		bool USER_INPUT_SHOWSTATUS;
 		bool NEW_IMAGE_TO_PUB;
 		bool NEW_MODEL_TO_PUB;
 
@@ -17,8 +20,13 @@ class MyReconstr_Controller
 		MODEL_STATUS_LIST MODEL_STATE;
 		SYSTEM_STATUS_LIST SYSTEM_STATE;
 
-		PointCloud<PointXYZRGBNormal> Model3D;  			
-		cv_bridge::CvImagePtr Images2D;
+		vector<cv::Mat> CURRENT_IMAGES;
+		vector<vector<double> > CURRENT_CAM_POSES;
+
+		PointCloud<PointXYZRGB> Model3D;  
+		PointCloud<PointXYZRGB> Model3D_Last;  				
+		cv::Mat Images2D;		
+		cv::Mat Images2D_Last;
 
 		ros::NodeHandle nh_; 
 		ros::Publisher model_pub_;
@@ -51,8 +59,10 @@ class MyReconstr_Controller
 		static void *static_io_process(void*);
 		static void *static_reconstr_process(void*);
 
-		void load_currect_images_and_pose(double);
-		
+		void load_currect_images_and_pose();
+		void clean_up_and_ready_for_restart();
+		void final_result_publish_and_display();
+
 		void modelPb();
 		void imagePb();
 };

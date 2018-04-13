@@ -58,7 +58,9 @@
   <build_depend>usb_cam</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl</build_depend>
 
+  <exec_depend>pcl</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>image_transport</exec_depend>

@@ -2,7 +2,9 @@
 
 MyReconstr_Display::MyReconstr_Display()
 {
-	// any init steps
+	this->USER_INPUT_PAUSE = false;
+	this->USER_INPUT_SHOWSTATUS = false;
+	this->CAMERA_COUNT = 0;
 }
 
 
@@ -65,7 +67,7 @@ void MyReconstr_Display::display_system_message(int message_code)
 			cout<<endl<<"[System Info] cv_bridge exception: ";
 			break;
 		case 6:
-			cout<<endl<<"[System Info] plc::PointCloud exception occurred."<<endl<<endl;
+			cout<<endl<<"[System Info] pcl::PointCloud exception occurred."<<endl<<endl;
 			break;
 		case 7:
 			cout<<endl<<"[System Info] Failed to init ros."<<endl<<endl;
@@ -90,6 +92,23 @@ void MyReconstr_Display::show_csv_data_summary(int cam_idx, int img_count, int p
 	cout<<"    CAM_POSE_DATA:   "<<poses_count<<" poses"<<endl;
 	cout<<"    CALI_INTRI_DATA: "<<intri_data.reshape(intri_data.rows*intri_data.cols,1)<<endl;
 	cout<<"    CALI_DISTO_DATA: "<<disto_data<<endl;
+}
+
+
+void MyReconstr_Display::show_camera_pose(double system_time, vector<vector<double> > current_cam_poses)
+{
+	if(current_cam_poses.size() != CAMERA_COUNT)
+		get_data_error(10);
+
+	cout<<"system time:"<<system_time<<endl;
+	for(int i=0;i<CAMERA_COUNT;i++)
+	{
+		if(current_cam_poses[i].size() != CAM_POSE_SIZE)
+			get_data_error(11);
+
+		cout<<"cam_pose_"<<i<<" (x,y,z): "<<current_cam_poses[i][3]<<"    "<<current_cam_poses[i][7]<<"    "<<current_cam_poses[i][11]<<endl;
+	}
+	cout<<endl;
 }
 
 
@@ -149,5 +168,223 @@ void MyReconstr_Display::get_data_error(int message_code)
 		case 9:
 			cout<<endl<<"[Data Warning] Retrieved images and camera count don't match."<<endl<<endl;
 			break;
+		case 10:
+			cout<<endl<<"[Data Warning] Trying to display camera pose with wrong camera count."<<endl<<endl;
+			break;
+		case 11:
+			cout<<endl<<"[Data Warning] Trying to display camera pose with wrong dimension."<<endl<<endl;
+			break;
 	}
 }
+
+
+void MyReconstr_Display::reset_data_pointers()
+{
+	this->USER_INPUT_PAUSE = false;
+	this->USER_INPUT_SHOWSTATUS = false;
+}
+
+
+bool MyReconstr_Display::check_if_paused()
+{
+	bool check = this->USER_INPUT_PAUSE;
+	return check;
+}
+
+
+bool MyReconstr_Display::check_if_showstatus()
+{
+	bool check = this->USER_INPUT_SHOWSTATUS;
+
+	if(this->USER_INPUT_SHOWSTATUS)
+		this->USER_INPUT_SHOWSTATUS = false;
+
+	return check;
+}
+
+
+void MyReconstr_Display::display_menu()
+{
+	cout<<endl<<endl;
+	cout<<"---------------------------Main Menu-------------------------"<<endl;
+	cout<<"(D): Display collected data."<<endl;	
+	cout<<"(Q): Perform 3D reconstruction in quiet mode."<<endl;
+	cout<<"(R): Perform 3D reconstruction in debug mode."<<endl;
+	cout<<"(E): System exit."<<endl<<endl<<endl;
+}
+
+
+void MyReconstr_Display::display_sub_menu_d()
+{
+	cout<<endl<<endl;
+	cout<<"--------------------Sub Menu: Data Display-------------------"<<endl;
+	cout<<"(S): Show current status."<<endl;
+	cout<<"(R): Toggle system pause and resume."<<endl;
+	cout<<"(B): Quit and go back."<<endl<<endl<<endl;
+}
+
+
+void MyReconstr_Display::display_sub_menu_r()
+{
+	cout<<endl<<endl;
+	cout<<"-------------------Sub Menu: Reconstruction------------------"<<endl;
+	cout<<"(S): Show current status."<<endl;	
+	cout<<"(T): Toggle quiet mode and debug mode."<<endl;
+	cout<<"(R): Toggle system pause and resume."<<endl;
+	cout<<"(B): Quit and go back."<<endl<<endl<<endl;
+}
+
+
+void MyReconstr_Display::display_starting_message()
+{
+	cout<<"\n\n\nstart welcome!!"<<endl;
+}
+
+
+void MyReconstr_Display::display_closing_message()
+{
+	cout<<"end goodbye."<<endl;
+}
+
+
+void MyReconstr_Display::display_wrapping_up_message()
+{
+	cout<<"wrapping up reconstruction results..."<<endl;
+}
+
+
+SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_p(int theKey)
+{
+	SYSTEM_STATUS_LIST sys_status = SYSTEM_PENDING_USER_SELECTION;
+	if(theKey!=-1)
+	{
+		switch(theKey)
+		{
+			case 100: // 'd' or 'D' : display collected data
+			case 68:
+				cout<<endl<<"'d' Key Pressed: Display collected data."<<endl;
+				sys_status = SYSTEM_DATA_DISPLAY_MODE;
+				display_sub_menu_d();
+				break;
+
+			case 113: // 'q' or 'Q' : perform 3D reconstruction in quiet mode
+			case 81:
+				cout<<endl<<"'q' Key Pressed: Perform 3D reconstruction in quiet mode."<<endl;
+				sys_status = SYSTEM_RECONSTR_QUIET_MODE;
+				display_sub_menu_r();
+				break;
+
+			case 114: // 'r' or 'R' : perform 3D reconstruction in debug mode
+			case 82:
+				cout<<endl<<"'r' Key Pressed: Perform 3D reconstruction in debug mode."<<endl;
+				sys_status = SYSTEM_RECONSTR_DEBUG_MODE;
+				display_sub_menu_r();
+				break;
+
+			case 101: // 'e' or 'E' : system exit
+			case 69:
+				cout<<endl<<"'e' Key Pressed: Exit."<<endl;
+				sys_status = SYSTEM_EXIT_ALL;
+				break;
+
+			default:
+				cout<<"'other' Key Pressed: Unrecognized option."<<endl;
+				break;
+		}
+	}
+	return sys_status;
+}
+
+
+SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_d(int theKey)
+{
+	SYSTEM_STATUS_LIST sys_status = SYSTEM_DATA_DISPLAY_MODE;
+	if(theKey!=-1)
+	{
+		switch(theKey)
+		{
+			case 115: // 's' or 'S' : show current status.
+			case 83:
+				cout<<endl<<"'s' Key Pressed: Show current status."<<endl;
+				this->USER_INPUT_SHOWSTATUS = true;
+				break;
+
+			case 114: // 'r' or 'R' : toggle system pause and resume.
+			case 82:
+				cout<<endl<<"'r' Key Pressed: Toggle system pause and resume."<<endl;
+				this->USER_INPUT_PAUSE = !(this->USER_INPUT_PAUSE);
+
+				if(this->USER_INPUT_PAUSE)
+					cout<<"                 System is now paused. Press 'r' again to resume."<<endl;
+				else
+					cout<<"                 System is now resumed."<<endl;
+				break;
+
+			case 98: // 'b' or 'B' : quit and go back.
+			case 66:
+				cout<<endl<<"'b' Key Pressed: Quit and go back."<<endl;
+				sys_status = SYSTEM_DATA_ENDING;
+				break;
+
+			default:
+				cout<<"'other' Key Pressed: Unrecognized option."<<endl;
+				break;
+		}
+	}
+	return sys_status;
+}
+
+
+SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_r(int theKey, SYSTEM_STATUS_LIST sys_status)
+{
+	if(theKey!=-1)
+	{
+		switch(theKey)
+		{
+			case 115: // 's' or 'S' : show current status.
+			case 83:
+				cout<<endl<<"'s' Key Pressed: Show current status."<<endl;
+				this->USER_INPUT_SHOWSTATUS = true;
+				break;
+
+			case 116: // 't' or 'T' : toggle quiet mode and debug mode.
+			case 84:
+				cout<<endl<<"'t' Key Pressed: Toggle quiet mode and debug mode."<<endl;
+				if(sys_status == SYSTEM_RECONSTR_QUIET_MODE)
+				{
+					cout<<"                 System is now in debug mode."<<endl;
+					sys_status = SYSTEM_RECONSTR_DEBUG_MODE;
+				}
+				else if(sys_status == SYSTEM_RECONSTR_DEBUG_MODE)
+				{
+					cout<<"                 System is now in quiet mode."<<endl;
+					sys_status = SYSTEM_RECONSTR_QUIET_MODE;
+				}
+				break;
+
+			case 114: // 'r' or 'R' : toggle system pause and resume.
+			case 82:
+				cout<<endl<<"'r' Key Pressed: Toggle system pause and resume."<<endl;
+				this->USER_INPUT_PAUSE = !(this->USER_INPUT_PAUSE);
+
+				if(this->USER_INPUT_PAUSE)
+					cout<<"                 System is now paused. Press 'r' again to resume."<<endl;
+				else
+					cout<<"                 System is now resumed."<<endl;
+				break;
+
+			case 98: // 'b' or 'B' : quit and go back.
+			case 66:
+				cout<<endl<<"'b' Key Pressed: Quit and go back."<<endl;
+				sys_status = SYSTEM_DATA_ENDING;
+				break;
+
+			default:
+				cout<<"'other' Key Pressed: Unrecognized option."<<endl;
+				break;
+		}
+	}
+	return sys_status;
+}
+
+
