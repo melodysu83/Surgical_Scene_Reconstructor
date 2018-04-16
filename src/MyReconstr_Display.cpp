@@ -112,6 +112,14 @@ void MyReconstr_Display::show_camera_pose(double system_time, vector<vector<doub
 }
 
 
+void MyReconstr_Display::show_system_status(int img_pub_cnt,int mdl_pub_cnt)
+{
+	cout<<endl<<"--------------System Status Update--------------"<<endl;
+	cout<<"number of 2D images published: "<<img_pub_cnt<<endl;
+	cout<<"number of 3D models published: "<<mdl_pub_cnt<<endl;
+}
+
+
 void MyReconstr_Display::no_valid_camera_info_file(int topic,int start,int end)
 {
 	if(topic == 1) // instrinsic
@@ -173,6 +181,20 @@ void MyReconstr_Display::get_data_error(int message_code)
 			break;
 		case 11:
 			cout<<endl<<"[Data Warning] Trying to display camera pose with wrong dimension."<<endl<<endl;
+			break;
+	}
+}
+
+
+void MyReconstr_Display::visual_processing_error(int message_code)
+{
+	switch(message_code)
+	{
+		case 0:
+			cout<<endl<<"[Vision Error] 'draw_feature_points_for_images' function has mismatched images and key point lists size."<<endl<<endl;
+			break;
+		case 1:
+			cout<<endl<<"[Vision Error] 'image_collage_maker' function expect input to be a vector of same-sized images."<<endl<<endl;
 			break;
 	}
 }

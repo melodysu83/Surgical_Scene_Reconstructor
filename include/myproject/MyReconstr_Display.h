@@ -17,8 +17,10 @@ class MyReconstr_Display
 		void display_system_message(int);
 		void show_csv_data_summary(int,int,int,cv::Mat,cv::Mat);
 		void show_camera_pose(double,vector<vector<double> >);
+		void show_system_status(int,int);
 		void no_valid_camera_info_file(int,int,int);
 		void get_data_error(int);
+		void visual_processing_error(int);
 		void reset_data_pointers();
 		bool check_if_paused();
 		bool check_if_showstatus();

@@ -44,6 +44,7 @@
 #include <opencv/cv.h>
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/core/utility.hpp"
+#include "opencv2/features2d.hpp"
 
 #define ROS_PARAMETER_NAME0 "/Surgical_Scene_Reconstructor/CAMERA_COUNT"
 #define ROS_PARAMETER_NAME1 "/Surgical_Scene_Reconstructor/IMG_FOLDER"

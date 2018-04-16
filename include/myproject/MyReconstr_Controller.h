@@ -1,7 +1,7 @@
 #ifndef MYRECONSTR_CONTROLLER_H
 #define MYRECONSTR_CONTROLLER_H
 
-#include "myproject/MyReconstr_Storage.h"
+#include "myproject/MyReconstr_Vision.h"
 class MyReconstr_Controller
 {
 	private:		
@@ -39,6 +39,7 @@ class MyReconstr_Controller
 
 		MyReconstr_Display CONSOLE;
 		MyReconstr_Storage DATABANK;
+		MyReconstr_Vision VISIONTOOL;
 	public:
 		MyReconstr_Controller(int argc, char** argv);
 		~MyReconstr_Controller();

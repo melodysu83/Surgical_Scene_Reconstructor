@@ -188,8 +188,7 @@ void *MyReconstr_Controller::console_process()
 
 		if(USER_INPUT_SHOWSTATUS)
 		{
-			//ToDo: Show status
-			//CONSOLE.show_system_status();
+			CONSOLE.show_system_status(IMAGE_PUB_COUNT,MODEL_PUB_COUNT);
 			CONSOLE.show_camera_pose(SYSTEM_TIME,CURRENT_CAM_POSES);
 		}
 
@@ -264,13 +263,7 @@ void *MyReconstr_Controller::reconstr_process()
 			this->MODEL_STATE = MODEL_START_PROCESSING;
 
 			// (1) feature extraction: compute for Images2D
-			// ToDo: Replace the following baby script with real stuff!
-			int r=10;
-			int c=24;
-			int b=1; // B,G,R
-
-			Images2D = CURRENT_IMAGES[0].clone();
-			Images2D.at<cv::Vec3b>(r,c)[b] = 27;
+			Images2D = VISIONTOOL.process_image2D(CURRENT_IMAGES);
 
 			this->NEW_IMAGE_TO_PUB = true;
 
@@ -281,16 +274,8 @@ void *MyReconstr_Controller::reconstr_process()
 				// (3) camera grouping and map building...?
 
 				// (4) compute for Model3D
-				// ToDo: Replace the following baby script with real stuff!
-				// ref: http://docs.pointclouds.org/trunk/classpcl_1_1_point_cloud.html
-
-				Model3D.clear(); // Removes all points in a cloud and sets the width and height to 0. 
-				PointXYZRGB pt1, pt2;
-				pt1.x = 1;	pt1.y = 2;	pt1.z = 50;	pt1.r = 100;	pt1.g = 100;	pt1.b = 125;
-				pt2.x = 1;	pt2.y = 57;	pt2.z = 5;  	pt2.r = 223;	pt2.g = 12;	pt2.b = 50;
-				Model3D.points.push_back(pt1);
-				Model3D.points.push_back(pt2);
-				// to access each point: Model3D.points[0], Model3D.points[1]
+				Model3D.clear(); 
+				Model3D = VISIONTOOL.process_model3D();
 				
 				// (5) set flags
 				this->NEW_MODEL_TO_PUB = true;
