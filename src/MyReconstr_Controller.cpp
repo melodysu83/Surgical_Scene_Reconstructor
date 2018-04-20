@@ -72,6 +72,10 @@ void MyReconstr_Controller::init_sys()
 	this->USER_INPUT_PAUSE = false;
 	this->USER_INPUT_SHOWSTATUS = false;
 	
+	this->MY_FEATURE_ALGO = DEFAULT_FEATURE_ALGO;
+	CONSOLE.set_feature_detection_algo(MY_FEATURE_ALGO);
+	VISIONTOOL.set_feature_detection_algo(MY_FEATURE_ALGO);
+
 	namedWindow( OPENCV_IMSHOW_WINDOW_NAME, WINDOW_AUTOSIZE ); // Create a window for display.
 }
 
@@ -184,6 +188,19 @@ void *MyReconstr_Controller::console_process()
 				CONSOLE.display_closing_message();
 				exit(1);
 				break;	
+			
+			case SYSTEM_SHOW_FEATURE_MENU:
+				CONSOLE.display_feature_menu();
+				VISIONTOOL.display_all_feature_algos(DATABANK.get_random_image());
+				SYSTEM_STATE = SYSTEM_PENDING_FEATURE_CHOICE;
+				break;
+
+			case SYSTEM_PENDING_FEATURE_CHOICE:
+				theKey = CONSOLE.get_key();
+				SYSTEM_STATE = CONSOLE.check_user_selection_f(theKey);
+				MY_FEATURE_ALGO = CONSOLE.get_feature_detection_algo();
+				VISIONTOOL.set_feature_detection_algo(MY_FEATURE_ALGO);
+				break;
 		}
 
 		if(USER_INPUT_SHOWSTATUS)

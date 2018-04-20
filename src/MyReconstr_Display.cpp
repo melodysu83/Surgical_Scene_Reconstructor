@@ -5,6 +5,7 @@ MyReconstr_Display::MyReconstr_Display()
 	this->USER_INPUT_PAUSE = false;
 	this->USER_INPUT_SHOWSTATUS = false;
 	this->CAMERA_COUNT = 0;
+	this->MY_FEATURE_ALGO = DEFAULT_FEATURE_ALGO;
 }
 
 
@@ -41,6 +42,19 @@ int MyReconstr_Display::get_key()
 void MyReconstr_Display::set_camera_count(int cam_cnt)
 {
 	this->CAMERA_COUNT = cam_cnt;
+}
+
+
+void MyReconstr_Display::set_feature_detection_algo(FEATURE_ALGO_LIST my_algo)
+{
+	this->MY_FEATURE_ALGO = my_algo;
+}
+
+
+FEATURE_ALGO_LIST MyReconstr_Display::get_feature_detection_algo()
+{
+	FEATURE_ALGO_LIST result = this->MY_FEATURE_ALGO;
+	return result;
 }
 
 
@@ -81,7 +95,16 @@ void MyReconstr_Display::display_system_message(int message_code)
 		case 10:
 			cout<<endl<<"[System Info] Camera pose retrieval fail. Number of specified time entries and camera count don't match."<<endl<<endl;
 			break;
+		case 11:
+			cout<<endl<<"[System Info] Invalid MY_FEATURE_ALGO settings."<<endl<<endl;
+			break;
 	}
+}
+
+
+void MyReconstr_Display::show_runtime(string ss, ros::Duration time_span)
+{
+	cout<<"Runtime for '"<<ss<<"' operation: "<<time_span<<" (sec)"<<endl;
 }
 
 
@@ -227,14 +250,36 @@ bool MyReconstr_Display::check_if_showstatus()
 
 void MyReconstr_Display::display_menu()
 {
+	string ss = FEATURE_ALGO_TO_STRING(MY_FEATURE_ALGO);
 	cout<<endl<<endl;
+
 	cout<<"---------------------------Main Menu-------------------------"<<endl;
 	cout<<"(D): Display collected data."<<endl;	
 	cout<<"(Q): Perform 3D reconstruction in quiet mode."<<endl;
 	cout<<"(R): Perform 3D reconstruction in debug mode."<<endl;
+	cout<<"(F): Change Feature Detection Algorithms. (Current: "<<ss<<")"<<endl;
 	cout<<"(E): System exit."<<endl<<endl<<endl;
 }
 
+
+void MyReconstr_Display::display_feature_menu()
+{
+	string ss;
+	cout<<endl<<endl;
+	cout<<"---------------------------Sub Menu: Feature Algo Selection-------------------------"<<endl;
+	cout<<"(R): Random image feature detection with all algorithms."<<endl;	
+
+	ss = (MY_FEATURE_ALGO == FAST_ALGO)? " <--Currently in Use":"";
+	cout<<"(F): Choose the FAST Algorithm."<<ss<<endl;
+
+	ss = (MY_FEATURE_ALGO == SURF_ALGO)? " <--Currently in Use":"";
+	cout<<"(S): Choose the SURF Algorithm."<<ss<<endl;
+
+	ss = (MY_FEATURE_ALGO == ORB_ALGO)? " <--Currently in Use":"";
+	cout<<"(O): Choose the ORB Algorithm."<<ss<<endl;
+
+	cout<<"(B): Quit and go back."<<endl<<endl<<endl;
+}
 
 void MyReconstr_Display::display_sub_menu_d()
 {
@@ -301,6 +346,12 @@ SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_p(int theKey)
 				cout<<endl<<"'r' Key Pressed: Perform 3D reconstruction in debug mode."<<endl;
 				sys_status = SYSTEM_RECONSTR_DEBUG_MODE;
 				display_sub_menu_r();
+				break;
+
+			case 102: // 'f' or 'F' : change feature detection algorithm
+			case 70:
+				cout<<endl<<"'f' Key Pressed: Change Feature Detection Algorithms."<<endl;
+				sys_status = SYSTEM_SHOW_FEATURE_MENU;
 				break;
 
 			case 101: // 'e' or 'E' : system exit
@@ -381,6 +432,8 @@ SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_r(int theKey, SYSTEM
 				{
 					cout<<"                 System is now in quiet mode."<<endl;
 					sys_status = SYSTEM_RECONSTR_QUIET_MODE;
+					destroyWindow(OPENCV_IMSHOW_WINDOW_NAME);
+					namedWindow(OPENCV_IMSHOW_WINDOW_NAME);
 				}
 				break;
 
@@ -399,6 +452,56 @@ SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_r(int theKey, SYSTEM
 			case 66:
 				cout<<endl<<"'b' Key Pressed: Quit and go back."<<endl;
 				sys_status = SYSTEM_DATA_ENDING;
+				break;
+
+			default:
+				cout<<"'other' Key Pressed: Unrecognized option."<<endl;
+				break;
+		}
+	}
+	return sys_status;
+}
+
+
+SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_f(int theKey)
+{
+	SYSTEM_STATUS_LIST sys_status = SYSTEM_PENDING_FEATURE_CHOICE;
+
+	if(theKey!=-1)
+	{
+		switch(theKey)
+		{
+			case 114: // 'r' or 'R' : random image feature detection with all algorithms.
+			case 82:
+				cout<<endl<<"'r' Key Pressed: Random image feature detection with all algorithms."<<endl;
+				sys_status = SYSTEM_SHOW_FEATURE_MENU;
+				break;
+
+			case 102: // 'f' or 'F' : choose the FAST Algorithm.
+			case 70:
+				cout<<endl<<"'f' Key Pressed: Choose the FAST Algorithm."<<endl;
+				set_feature_detection_algo(FAST_ALGO);
+				sys_status = SYSTEM_SHOW_MENU;
+				break;
+
+			case 115: // 's' or 'S' : choose the SURF Algorithm.
+			case 83:
+				cout<<endl<<"'s' Key Pressed: Choose the SURF Algorithm."<<endl;
+				set_feature_detection_algo(SURF_ALGO);
+				sys_status = SYSTEM_SHOW_MENU;
+				break;
+
+			case 111: // 'o' or 'O' : choose the ORB Algorithm.
+			case 79:
+				cout<<endl<<"'o' Key Pressed: Choose the ORB Algorithm."<<endl;
+				set_feature_detection_algo(ORB_ALGO);
+				sys_status = SYSTEM_SHOW_MENU;
+				break;
+
+			case 98: // 'b' or 'B' : quit and go back.
+			case 66:
+				cout<<endl<<"'b' Key Pressed: Quit and go back."<<endl;
+				sys_status = SYSTEM_SHOW_MENU;
 				break;
 
 			default:

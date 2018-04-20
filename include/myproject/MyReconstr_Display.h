@@ -8,13 +8,18 @@ class MyReconstr_Display
 		int CAMERA_COUNT;
 		bool USER_INPUT_PAUSE;
 		bool USER_INPUT_SHOWSTATUS;
+		FEATURE_ALGO_LIST MY_FEATURE_ALGO; 
 	public:
 		MyReconstr_Display();
 		~MyReconstr_Display();
 
 		int get_key();
 		void set_camera_count(int);
+		void set_feature_detection_algo(FEATURE_ALGO_LIST);
+		FEATURE_ALGO_LIST get_feature_detection_algo();
+
 		void display_system_message(int);
+		void show_runtime(string, ros::Duration);
 		void show_csv_data_summary(int,int,int,cv::Mat,cv::Mat);
 		void show_camera_pose(double,vector<vector<double> >);
 		void show_system_status(int,int);
@@ -26,6 +31,7 @@ class MyReconstr_Display
 		bool check_if_showstatus();
 
 		void display_menu();
+		void display_feature_menu();
 		void display_sub_menu_d();
 		void display_sub_menu_r();
 		void display_starting_message();
@@ -34,6 +40,7 @@ class MyReconstr_Display
 		SYSTEM_STATUS_LIST check_user_selection_p(int);
 		SYSTEM_STATUS_LIST check_user_selection_d(int);
 		SYSTEM_STATUS_LIST check_user_selection_r(int, SYSTEM_STATUS_LIST);
+		SYSTEM_STATUS_LIST check_user_selection_f(int);
 };
 
 #endif

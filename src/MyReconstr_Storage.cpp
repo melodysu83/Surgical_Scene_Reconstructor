@@ -280,6 +280,60 @@ void MyReconstr_Storage::reset_data_pointers()
 }
 
 
+cv::Mat MyReconstr_Storage::get_random_image()
+{
+	int cam_choice = rand() % CAMERA_COUNT;
+	vector<cv::Mat> imgs = get_random_images();
+
+	cv::Mat img = imgs[cam_choice].clone();
+	return img;
+}
+
+
+vector<cv::Mat> MyReconstr_Storage::get_random_images()
+{
+	bool success = false;
+	int out_of_bound_count = 0;
+	vector<cv::Mat> current_images;
+	
+
+	while(!success)
+	{
+		success = true;
+		current_images.clear();
+		double time_now = double(rand() % 6000)/10.0;
+
+		for(int i=0; i<CAMERA_COUNT; i++)
+		{
+			int row_max = TME_STAMP_DATA[i].size();
+
+			// (1) filter out weird system time
+			if(time_now > TME_STAMP_DATA[i][row_max-1][TIME_STAMP_COL])
+			{
+				success = false;
+				break;	
+			}
+
+			// (2) find image index
+			int idx = image_index_binary_search(time_now,i,0,row_max-1); // cam_idx, row_start,row_end
+			if(idx == -1)
+			{
+				success = false;
+				break;
+			}
+			else
+			{
+				std::ostringstream ss;
+	    			ss << std::setw(IMAGE_FILE_DIGITS) << std::setfill( '0' ) << idx;
+				cv::Mat img_curr = imread(get_img_folder_name(i+1)+ss.str()+".png");
+				current_images.push_back(img_curr.clone());
+			}
+		}
+	}
+	return current_images;
+}
+
+
 vector<cv::Mat> MyReconstr_Storage::get_current_images()
 {
 	int out_of_bound_count = 0;
@@ -456,6 +510,57 @@ int MyReconstr_Storage::current_image_index_find_closest(int cam_idx,int row_pre
 	int row;
 	int row_max = TME_STAMP_DATA[cam_idx].size();
 	double time_now = (this->SYSTEM_TIME);
+
+	if(row_prev<row_max && row_prev+1<row_max)
+	{
+		double time_prev = TME_STAMP_DATA[cam_idx][row_prev][TIME_STAMP_COL];
+		double time_next = TME_STAMP_DATA[cam_idx][row_prev+1][TIME_STAMP_COL];
+
+		if(time_now-time_prev > time_next-time_now || time_prev < 0)
+			row = row_prev+1;
+		else
+			row = row_prev;
+	}
+	else if(row_prev>=row_max)
+	{
+		row = -1;
+		CONSOLE.get_data_error(3);
+		exit(1);
+	}
+	else
+	{
+		row = row_prev;
+		CONSOLE.get_data_error(4);
+	}
+
+	return row;
+}
+
+
+int MyReconstr_Storage::image_index_binary_search(double time_now, int cam_idx,int row_start,int row_end)
+{
+	int row;
+	int row_test;
+
+	while( row_end-row_start > 1)
+	{
+		row_test = rint(0.5*(row_start+row_end));
+		if(TME_STAMP_DATA[cam_idx][row_test][TIME_STAMP_COL] > time_now)
+			row_end = row_test;
+		else
+			row_start = row_test;
+	}
+	
+	row = image_index_find_closest(time_now,cam_idx,row_start);
+
+	return row;
+}
+
+
+int MyReconstr_Storage::image_index_find_closest(double time_now, int cam_idx,int row_prev)
+{
+	int row;
+	int row_max = TME_STAMP_DATA[cam_idx].size();
 
 	if(row_prev<row_max && row_prev+1<row_max)
 	{

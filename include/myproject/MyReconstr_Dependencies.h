@@ -45,6 +45,8 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/core/utility.hpp"
 #include "opencv2/features2d.hpp"
+#include "opencv2/xfeatures2d.hpp"
+#include <opencv2/opencv.hpp>
 
 #define ROS_PARAMETER_NAME0 "/Surgical_Scene_Reconstructor/CAMERA_COUNT"
 #define ROS_PARAMETER_NAME1 "/Surgical_Scene_Reconstructor/IMG_FOLDER"
@@ -54,7 +56,9 @@
 
 #define ROS_TOPIC_PUBLISH_NAME1 "/Surgical_Scene_Reconstructor/2D_images"
 #define ROS_TOPIC_PUBLISH_NAME2 "/Surgical_Scene_Reconstructor/3D_model"
+
 #define OPENCV_IMSHOW_WINDOW_NAME "My Image"
+#define OPENCV_IMSHOW_WINDOW_SCALE 1.7
 
 #define CONSOLE_LOOP_RATE   10     // in Hz
 #define IO_LOOP_RATE        30     // in Hz
@@ -67,6 +71,15 @@
 #define IMAGE_W		    640    // image width
 #define IMAGE_FILE_DIGITS   5      // number of digits in the image files names
 
+// namespace declaration
+using namespace std;
+using namespace cv;
+using namespace ros;
+using namespace pcl;
+using namespace pcl::io;
+using namespace pcl_conversions;
+
+// enum declaration
 enum IMAGE_STATUS_LIST{
 	IMAGE_EMPTY,       // 0
 	IMAGE_START_LOADING,     // 1
@@ -86,22 +99,31 @@ enum MODEL_STATUS_LIST{
 };
 
 enum SYSTEM_STATUS_LIST{
-	SYSTEM_JUST_STARTING,                   // 0
-	SYSTEM_SHOW_MENU,                       // 1
-	SYSTEM_PENDING_USER_SELECTION,          // 2
-	SYSTEM_DATA_DISPLAY_MODE,	        // 3
-	SYSTEM_RECONSTR_QUIET_MODE, 		// 4
-	SYSTEM_RECONSTR_DEBUG_MODE,		// 5
-	SYSTEM_DATA_ENDING,			// 6
-	SYSTEM_EXIT_ALL,                        // 7
+	SYSTEM_JUST_STARTING,       	// 0
+	SYSTEM_SHOW_MENU,               // 1
+	SYSTEM_PENDING_USER_SELECTION,  // 2
+	SYSTEM_DATA_DISPLAY_MODE,	// 3
+	SYSTEM_RECONSTR_QUIET_MODE, 	// 4
+	SYSTEM_RECONSTR_DEBUG_MODE,	// 5
+	SYSTEM_DATA_ENDING,		// 6
+	SYSTEM_EXIT_ALL,                // 7
+	SYSTEM_SHOW_FEATURE_MENU,	// 8
+	SYSTEM_PENDING_FEATURE_CHOICE   // 9
+	
 };
 
-// namespace declaration
-using namespace std;
-using namespace cv;
-using namespace ros;
-using namespace pcl;
-using namespace pcl::io;
-using namespace pcl_conversions;
+enum FEATURE_ALGO_LIST{
+	FAST_ALGO,	// 0 : Suggested by OpenCV for real time application (https://docs.opencv.org/3.1.0/df/d0c/tutorial_py_fast.html)
+
+	SURF_ALGO,	// 1 : Used in COSLAM (https://github.com/danping/CoSLAM/blob/master/src/app/SL_InitMap.cpp)
+			//     which claims to be fast than sift? (https://stackoverflow.com/questions/11172408/surf-vs-sift-is-surf-really-faster)
+
+	ORB_ALGO,	// 2 : Used in mapping3d (https://github.com/Tetragramm/opencv_contrib/blob/master/modules/mapping3d/samples/computeMapping3d.cpp)
+			//     claimed to be orientation invarient than FAST (https://docs.opencv.org/3.1.0/d1/d89/tutorial_py_orb.html)
+};
+
+#define NUM_OF_FEATURE_ALGO 3
+#define DEFAULT_FEATURE_ALGO FAST_ALGO
+string FEATURE_ALGO_TO_STRING(FEATURE_ALGO_LIST);
 
 #endif

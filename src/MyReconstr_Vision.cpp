@@ -2,7 +2,7 @@
 
 MyReconstr_Vision::MyReconstr_Vision()
 {
-	
+	this->MY_FEATURE_ALGO = DEFAULT_FEATURE_ALGO;
 }
 
 
@@ -11,13 +11,75 @@ MyReconstr_Vision::~MyReconstr_Vision()
 	
 }
 
-vector<KeyPoint>  MyReconstr_Vision::feature_extraction(cv::Mat img)
+
+void MyReconstr_Vision::set_feature_detection_algo(FEATURE_ALGO_LIST my_algo)
+{
+	this->MY_FEATURE_ALGO = my_algo;
+	CONSOLE.set_feature_detection_algo(my_algo);
+}
+
+
+void MyReconstr_Vision::display_all_feature_algos(cv::Mat src)
+{
+	cv::Mat img;
+	vector<cv::Mat> src_vec(NUM_OF_FEATURE_ALGO);
+	for(int i=0; i<NUM_OF_FEATURE_ALGO; i++)
+	{
+		string ss = FEATURE_ALGO_TO_STRING((FEATURE_ALGO_LIST)i);
+		Time t_start = ros::Time::now();
+		vector<KeyPoint> kpts = feature_extraction(src,(FEATURE_ALGO_LIST)i);
+		Time t_end = ros::Time::now();
+		CONSOLE.show_runtime(ss,t_end-t_start);
+		img = draw_feature_points(src,kpts);
+		putText(img, ss, cvPoint(30,30), FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,0,0), 1, CV_AA);
+		src_vec[i] = img.clone();
+		
+	}
+	img = image_collage_maker(src_vec);
+	imshow(OPENCV_IMSHOW_WINDOW_NAME,img);
+	cv::waitKey(30);
+}
+
+
+
+vector<KeyPoint>  MyReconstr_Vision::feature_extraction(cv::Mat img, FEATURE_ALGO_LIST my_algo)
 {
 	vector<KeyPoint> kpts;
-	Ptr<FastFeatureDetector> detector=FastFeatureDetector::create();
-	vector<Mat> descriptor;
+	vector<float> desc;
+	int dimDesc;
 
-	detector->detect(img,kpts,Mat());
+	Ptr<xfeatures2d::SURF> detector_SURF;
+	Ptr<FastFeatureDetector> detector_FAST;
+	Ptr<FeatureDetector> detector_ORB;
+
+	switch(my_algo)
+	{
+		case FAST_ALGO:
+			detector_FAST = FastFeatureDetector::create();
+			detector_FAST->detect(img,kpts,Mat());
+			break;
+
+		case SURF_ALGO:
+			detector_SURF = xfeatures2d::SURF::create(); // SURF::create(400, 4, 2, false)
+			detector_SURF->detectAndCompute(img,cv::Mat(), kpts, desc);
+			dimDesc = detector_SURF->descriptorSize(); 
+			break;
+
+		case ORB_ALGO:
+			detector_ORB = ORB::create(); //ToDo: ORB::create( 10000, 1.2, 1 ) find out what values to choose
+			detector_ORB->detect(img,kpts);
+			break;
+
+	}
+	return kpts;
+
+	//ToDo: look up DescriptorExtractor
+}
+
+
+vector<KeyPoint>  MyReconstr_Vision::feature_extraction(cv::Mat img)
+{
+	vector<KeyPoint> kpts = feature_extraction(img,this->MY_FEATURE_ALGO);
 	return kpts;
 }
 
@@ -73,8 +135,12 @@ cv::Mat MyReconstr_Vision::image_collage_maker(vector<cv::Mat> src_vec)
 	int img_cnt = src_vec.size();
 	int rows = floor(sqrt(img_cnt));
 	int cols = rows;
-	vector<cv::Mat> img_vec(cols*rows);
 	cv::Mat img;
+
+	while(cols*rows<img_cnt)
+		cols = cols+1;
+	vector<cv::Mat> img_vec(cols*rows);
+	double img_scale = double(1.0*OPENCV_IMSHOW_WINDOW_SCALE/cols);
 
 	for(int i=1; i<img_cnt; i++)
 	{
@@ -85,13 +151,10 @@ cv::Mat MyReconstr_Vision::image_collage_maker(vector<cv::Mat> src_vec)
 		}
 	}
 
-	while(cols*rows<img_cnt)
-		cols = cols+1;
-
 	for(int i=0; i<cols*rows; i++)
 	{
 		if(i<img_cnt)
-			resize(src_vec[i], img_vec[i], cv::Size(), double(1.0/cols), double(1.0/cols));
+			resize(src_vec[i], img_vec[i], cv::Size(), img_scale, img_scale);
 		else
 			img_vec[i] = cv::Mat(img_vec[i-1].rows,img_vec[i-1].cols,img_vec[i-1].type(), Scalar(0, 0, 0));
 	}
