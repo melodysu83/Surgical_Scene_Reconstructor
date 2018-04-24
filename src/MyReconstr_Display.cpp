@@ -223,6 +223,101 @@ void MyReconstr_Display::visual_processing_error(int message_code)
 }
 
 
+void MyReconstr_Display::image_tool_function_error(int message_code)
+{
+	switch(message_code)
+	{
+		case 0:
+			cout<<endl<<"[Image Tool Error] 'norm_1' requires a column vector of data type cv::Mat."<<endl<<endl;
+			break;
+		case 1:
+			cout<<endl<<"[Image Tool Error] 'norm_2' requires a column vector of data type cv::Mat."<<endl<<endl;
+			break;
+		case 2:
+			cout<<endl<<"[Image Tool Error] 'project_Wpt_to_Ipt' function has invalid arguement dimension."<<endl<<endl;
+			break;
+		case 3:
+			cout<<endl<<"[Image Tool Error] 'compute_projection_jacobian_J' expects arguement of size (2x3) or (3x4)."<<endl<<endl;
+			break;
+		case 4:
+			cout<<endl<<"[Image Tool Error] 'evaluate_Ipt_to_Mpt_correspondance' one or more arguements of invalid shape."<<endl<<endl;
+			break;
+		case 5:
+			cout<<endl<<"[Image Tool Error] 'to_scalable_form' function has incorrect return shape."<<endl<<endl;
+			break;
+		case 6:
+			cout<<endl<<"[Image Tool Error] 'to_normalized_form' trying to normalize by 0 factor."<<endl<<endl;
+			break;
+		case 7:
+			cout<<endl<<"[Image Tool Error] 'check_if_valid_Ipt' has incorrect input shape."<<endl<<endl;
+			break;
+		case 8:
+			cout<<endl<<"[Image Tool Error] 'check_if_valid_Mpt' has incorrect input shape."<<endl<<endl;
+			break;
+		case 9:
+			cout<<endl<<"[Image Tool Error] 'check_if_valid_P' expects input size (2x3) or (3x4)."<<endl<<endl;
+			break;
+		case 10:
+			cout<<endl<<"[Image Tool Error] 'check_if_normalized_Ipt' has incorrect input shape."<<endl<<endl;
+			break;
+		case 11:
+			cout<<endl<<"[Image Tool Error] 'check_if_normalized_Mpt' has incorrect input shape."<<endl<<endl;
+			break;
+		case 12:
+			cout<<endl<<"[Image Tool Error] 'check_if_normalized_P' expects input size (2x3) or (3x4)."<<endl<<endl;
+			break;
+		case 13:
+			cout<<endl<<"[Image Tool Error] 'check_if_valid_J' expects input size (2x3)."<<endl<<endl;
+			break;
+		case 14:
+			cout<<endl<<"[Image Tool Error] 'compute_Mpt_uncertainty_covariance_E' has invalid J input shape."<<endl<<endl;
+			break;
+		case 15:
+			cout<<endl<<"[Image Tool Error] 'check_if_valid_E' has invalid E input shape."<<endl<<endl;
+			break;
+		case 16:
+			cout<<endl<<"[Image Tool Error] 'check_if_valid_c' has invalid c input shape."<<endl<<endl;
+			break;
+		case 17:
+			cout<<endl<<"[Image Tool Error] 'mahalanobis_distance(pti,ptj,Ei,Ji)' incorrect input argument shape."<<endl<<endl;
+			break;
+		case 18:
+			cout<<endl<<"[Image Tool Error] 'mahalanobis_distance(pti,ptj,ci)' incorrect input argument shape."<<endl<<endl;
+			break;
+		case 19:
+			cout<<endl<<"[Image Tool Error] 'update_Mpt_from_Ipt' something wrong with thw Kalman filter gain K."<<endl<<endl;
+			break;
+		case 20:
+			cout<<endl<<"[Image Tool Error] 'update_Mpt_from_Ipt' invalid projection matrix P."<<endl<<endl;
+			break;
+		case 21:
+			cout<<endl<<"[Image Tool Error] 'update_Mpt_from_Ipt' either 3D  or 2D point has incorrect shape."<<endl<<endl;
+			break;
+		case 22:
+			cout<<endl<<"[Image Tool Error] 'check_if_valid_K' has invalid K shape."<<endl<<endl;
+			break;
+		case 23:
+			cout<<endl<<"[Image Tool Error] 'update_Mpt_from_Ipt' output size incorrect, something is wrong."<<endl<<endl;
+			break;
+		case 24:
+			cout<<endl<<"[Image Tool Error] 'update_kalman_gain' input size incorrect, something is wrong."<<endl<<endl;
+			break;
+		case 25:
+			cout<<endl<<"[Image Tool Error] 'update_kalman_gain' output size incorrect, something is wrong."<<endl<<endl;
+			break;
+		case 26:
+			cout<<endl<<"[Image Tool Error] 'update_Mpt_uncertainty_covariance_E' input size incorrect, something is wrong."<<endl<<endl;
+			break;
+		case 27:
+			cout<<endl<<"[Image Tool Error] 'update_Mpt_uncertainty_covariance_E' output size incorrect, something is wrong."<<endl<<endl;
+			break;
+		case 28:
+			cout<<endl<<"[Image Tool Error] 'check_if_valid_Js' expects input size ((2k)x3)."<<endl<<endl;
+			break;
+	}
+}
+
+
 void MyReconstr_Display::reset_data_pointers()
 {
 	this->USER_INPUT_PAUSE = false;

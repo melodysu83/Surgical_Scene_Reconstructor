@@ -1,7 +1,7 @@
 #ifndef MYRECONSTR_VISION_H
 #define MYRECONSTR_VISION_H
 
-#include "myproject/MyReconstr_Storage.h"
+#include "myproject/MyReconstr_Imagefunc.h"
 class MyReconstr_Vision
 {
 	private:

@@ -26,6 +26,7 @@ class MyReconstr_Display
 		void no_valid_camera_info_file(int,int,int);
 		void get_data_error(int);
 		void visual_processing_error(int);
+		void image_tool_function_error(int);
 		void reset_data_pointers();
 		bool check_if_paused();
 		bool check_if_showstatus();

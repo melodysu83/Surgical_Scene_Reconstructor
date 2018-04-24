@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <queue>
 #include <unistd.h>
+#include <cmath>
 
 // dependencies on ros packages
 #include <ros/ros.h>
