@@ -191,7 +191,7 @@ void *MyReconstr_Controller::console_process()
 			
 			case SYSTEM_SHOW_FEATURE_MENU:
 				CONSOLE.display_feature_menu();
-				VISIONTOOL.display_all_feature_algos(DATABANK.get_random_image());
+				update_feature_related_settings();
 				SYSTEM_STATE = SYSTEM_PENDING_FEATURE_CHOICE;
 				break;
 
@@ -369,6 +369,35 @@ void MyReconstr_Controller::clean_up_and_ready_for_restart()
 	// (3) clear class object variables
 	DATABANK.reset_data_pointers();
 	CONSOLE.reset_data_pointers();
+}
+
+
+void MyReconstr_Controller::update_feature_related_settings()
+{
+	VISIONTOOL.display_all_feature_algos(DATABANK.get_random_image());
+	
+	int p1,p4,p5,p7,p9,p10;
+	double p3;
+	bool p2,p6;
+	float p8;
+	
+	if(CONSOLE.check_if_feature_detection_parameters_updated())
+	{
+		CONSOLE.get_feature_detection_parameters(&p1,&p2,&p3,&p4,&p5,&p6,&p7,&p8,&p9,&p10);
+		VISIONTOOL.set_feature_parameters_fast(p1,p2);
+		VISIONTOOL.set_feature_parameters_surf(p3,p4,p5,p6);
+		VISIONTOOL.set_feature_parameters_orb(p7,p8,p9,p10);
+	}
+
+	if(CONSOLE.check_if_display_feature_detection_parameters())
+	{
+		VISIONTOOL.show_feature_parameters(MY_FEATURE_ALGO);
+	}
+
+	if(CONSOLE.check_if_display_all_feature_detection_parameters())
+	{
+		VISIONTOOL.show_all_feature_parameters();
+	}
 }
 
 

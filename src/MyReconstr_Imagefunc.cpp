@@ -2,7 +2,7 @@
 
 MyReconstr_Imagefunc::MyReconstr_Imagefunc()
 {
-	this->sigma = 3.0;
+	this->sigma = DEFAULT_IMAGE_FUNC_SIGMA;
 	this->I2 = cv::Mat::eye(2,2, CV_32F);
 	this->I3 = cv::Mat::eye(3,3, CV_32F);
 }
@@ -22,7 +22,7 @@ double MyReconstr_Imagefunc::get_sigma() // get current sigma value
 
 void MyReconstr_Imagefunc::set_sigma(double sig)// set new sigma value
 {
-	this->sigma = sig;
+	this->sigma = sig; //ToDo: actually call this function somewhere!~
 }
 
 

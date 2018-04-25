@@ -63,6 +63,7 @@ class MyReconstr_Controller
 
 		void load_currect_images_and_pose();
 		void clean_up_and_ready_for_restart();
+		void update_feature_related_settings();
 		void final_result_publish_and_display();
 
 		void modelPb();

@@ -3,12 +3,109 @@
 MyReconstr_Vision::MyReconstr_Vision()
 {
 	this->MY_FEATURE_ALGO = DEFAULT_FEATURE_ALGO;
+
+	// set feature detection parameter values
+	reset_feature_parameters();
 }
 
 
 MyReconstr_Vision::~MyReconstr_Vision()
 {
+}
+
+
+void MyReconstr_Vision::reset_feature_parameters()
+{
+	// for FAST_ALGO
+	this->FEATURE_PARAM_INTENSITY_THRES = DEFAULT_FEATURE_PARAM_INTENSITY_THRES;
+	this->FEATURE_PARAM_NON_MAX_SUPPRE = DEFAULT_FEATURE_PARAM_NON_MAX_SUPPRE;	
+
+	// for SURF_ALGO
+	this->FEATURE_PARAM_HESSIAN_THRES = DEFAULT_FEATURE_PARAM_HESSIAN_THRES;
+	this->FEATURE_PARAM_N_PYRAMIDS = DEFAULT_FEATURE_PARAM_N_PYRAMIDS;
+	this->FEATURE_PARAM_N_PYRAMID_LAYERS = DEFAULT_FEATURE_PARAM_N_PYRAMID_LAYERS;
+	this->FEATURE_PARAM_DESCRIPTOR_EXTENDED = DEFAULT_FEATURE_PARAM_DESCRIPTOR_EXTENDED;
+
+	// for ORB_ALGO
+	this->FEATURE_PARAM_N_FEATURES = DEFAULT_FEATURE_PARAM_N_FEATURES;
+	this->FEATURE_PARAM_SCALE = DEFAULT_FEATURE_PARAM_SCALE;
+	this->FEATURE_PARAM_N_LEVELS = DEFAULT_FEATURE_PARAM_N_LEVELS;
+	this->FEATURE_PARAM_EDGE_THRES = DEFAULT_FEATURE_PARAM_EDGE_THRES;
+
+	// initialize detectors
+	create_feature_detectors();
+}
+
+
+void MyReconstr_Vision::set_feature_parameters_fast(int param1,bool param2)
+{
+	this->FEATURE_PARAM_INTENSITY_THRES = param1;
+	this->FEATURE_PARAM_NON_MAX_SUPPRE = param2;
+
+	create_feature_detectors();
+}
+
+
+void MyReconstr_Vision::set_feature_parameters_surf(double param1,int param2,int param3,bool param4)
+{
+	this->FEATURE_PARAM_HESSIAN_THRES = param1;
+	this->FEATURE_PARAM_N_PYRAMIDS = param2;
+	this->FEATURE_PARAM_N_PYRAMID_LAYERS = param3;
+	this->FEATURE_PARAM_DESCRIPTOR_EXTENDED = param4;
 	
+	create_feature_detectors();
+}
+
+
+void MyReconstr_Vision::set_feature_parameters_orb(int param1,float param2,int param3,int param4)
+{
+	this->FEATURE_PARAM_N_FEATURES = param1;
+	this->FEATURE_PARAM_SCALE = param2;
+	this->FEATURE_PARAM_N_LEVELS = param3;
+	this->FEATURE_PARAM_EDGE_THRES = param4;
+
+	create_feature_detectors();
+}
+
+
+void MyReconstr_Vision::show_feature_parameters(FEATURE_ALGO_LIST my_algo)
+{
+	switch(my_algo)
+	{
+		case FAST_ALGO:
+			CONSOLE.show_feature_detection_parameters_fast(FEATURE_PARAM_INTENSITY_THRES,FEATURE_PARAM_NON_MAX_SUPPRE);
+			break;
+
+		case SURF_ALGO:
+			CONSOLE.show_feature_detection_parameters_surf(FEATURE_PARAM_HESSIAN_THRES,FEATURE_PARAM_N_PYRAMIDS,FEATURE_PARAM_N_PYRAMID_LAYERS,FEATURE_PARAM_DESCRIPTOR_EXTENDED);
+			break;	
+
+		case ORB_ALGO:
+			CONSOLE.show_feature_detection_parameters_orb(FEATURE_PARAM_N_FEATURES,FEATURE_PARAM_SCALE,FEATURE_PARAM_N_LEVELS,FEATURE_PARAM_EDGE_THRES);
+			break;
+
+	}
+}
+
+
+void MyReconstr_Vision::show_all_feature_parameters()
+{
+	for(int i=0; i<NUM_OF_FEATURE_ALGO; i++)
+	{
+		show_feature_parameters((FEATURE_ALGO_LIST)i);
+	}
+}
+
+
+void MyReconstr_Vision::create_feature_detectors()
+{
+	// ref: https://docs.opencv.org/3.2.0/df/d74/classcv_1_1FastFeatureDetector.html
+	// ref: https://docs.opencv.org/3.4.1/d5/df7/classcv_1_1xfeatures2d_1_1SURF.html
+	// ref: https://docs.opencv.org/3.4.0/db/d95/classcv_1_1ORB.html
+
+	detector_fast = FastFeatureDetector::create(FEATURE_PARAM_INTENSITY_THRES,FEATURE_PARAM_NON_MAX_SUPPRE);
+	detector_surf = xfeatures2d::SURF::create(FEATURE_PARAM_HESSIAN_THRES,FEATURE_PARAM_N_PYRAMIDS,FEATURE_PARAM_N_PYRAMID_LAYERS,this->FEATURE_PARAM_DESCRIPTOR_EXTENDED);
+	detector_orb = ORB::create(FEATURE_PARAM_N_FEATURES,FEATURE_PARAM_SCALE,FEATURE_PARAM_N_LEVELS,FEATURE_PARAM_EDGE_THRES); 
 }
 
 
@@ -41,39 +138,26 @@ void MyReconstr_Vision::display_all_feature_algos(cv::Mat src)
 }
 
 
-
 vector<KeyPoint>  MyReconstr_Vision::feature_extraction(cv::Mat img, FEATURE_ALGO_LIST my_algo)
 {
 	vector<KeyPoint> kpts;
-	vector<float> desc;
-	int dimDesc;
-
-	Ptr<xfeatures2d::SURF> detector_SURF;
-	Ptr<FastFeatureDetector> detector_FAST;
-	Ptr<FeatureDetector> detector_ORB;
 
 	switch(my_algo)
 	{
 		case FAST_ALGO:
-			detector_FAST = FastFeatureDetector::create();
-			detector_FAST->detect(img,kpts,Mat());
+			detector_fast->detect(img,kpts,Mat());
 			break;
 
 		case SURF_ALGO:
-			detector_SURF = xfeatures2d::SURF::create(); // SURF::create(400, 4, 2, false)
-			detector_SURF->detectAndCompute(img,cv::Mat(), kpts, desc);
-			dimDesc = detector_SURF->descriptorSize(); 
-			break;
+			detector_surf->detect(img,kpts);
+			break;	
 
 		case ORB_ALGO:
-			detector_ORB = ORB::create(); //ToDo: ORB::create( 10000, 1.2, 1 ) find out what values to choose
-			detector_ORB->detect(img,kpts);
+			detector_orb->detect(img,kpts,Mat());	
 			break;
 
 	}
 	return kpts;
-
-	//ToDo: look up DescriptorExtractor
 }
 
 
@@ -86,15 +170,31 @@ vector<KeyPoint>  MyReconstr_Vision::feature_extraction(cv::Mat img)
 
 vector<vector<KeyPoint> >  MyReconstr_Vision::feature_extraction_for_images(vector<cv::Mat> img_vec)
 {
+	vector<vector<KeyPoint> > kpts_vec = feature_extraction_for_images(img_vec,this->MY_FEATURE_ALGO);
+	return kpts_vec;
+}
+
+
+vector<vector<KeyPoint> >  MyReconstr_Vision::feature_extraction_for_images(vector<cv::Mat> img_vec, FEATURE_ALGO_LIST my_algo)
+{
 	int img_cnt = img_vec.size();
-	vector<vector<KeyPoint> >  kpts_vec;
+	vector<vector<KeyPoint> >  kpts_vec(img_cnt);
 
-	for(int i=0; i<img_cnt; i++)
+	switch(my_algo)
 	{
-		vector<KeyPoint> row = feature_extraction(img_vec[i]);
-		kpts_vec.push_back(row);
-	}
+		case FAST_ALGO:
+			detector_fast->detect(img_vec,kpts_vec,Mat());
+			break;
 
+		case SURF_ALGO:
+			detector_surf->detect(img_vec,kpts_vec);
+			break;
+
+		case ORB_ALGO:
+			detector_orb->detect(img_vec,kpts_vec,Mat());
+			break;
+	}
+	
 	return kpts_vec;
 }
 
@@ -178,6 +278,8 @@ cv::Mat MyReconstr_Vision::process_image2D(vector<cv::Mat> curr_imgs)
 	vector<vector<KeyPoint> >  kpts_vec = feature_extraction_for_images(curr_imgs);
 	vector<cv::Mat> img_vec = draw_feature_points_for_images(curr_imgs,kpts_vec);
 	image2D = image_collage_maker(img_vec);
+
+	//ToDo: look up DescriptorExtractor
 
 	// ToDo: Replace the following baby script with real stuff!
 	/* 
