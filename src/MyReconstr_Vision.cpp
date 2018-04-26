@@ -34,6 +34,10 @@ void MyReconstr_Vision::reset_feature_parameters()
 
 	// initialize detectors
 	create_feature_detectors();
+
+	// clear feature points
+	features_inter_cam.clear();
+	features_intra_cam.clear();
 }
 
 
@@ -272,40 +276,98 @@ cv::Mat MyReconstr_Vision::image_collage_maker(vector<cv::Mat> src_vec)
 }
 
 
-cv::Mat MyReconstr_Vision::process_image2D(vector<cv::Mat> curr_imgs)
+cv::Mat MyReconstr_Vision::process_image2D(vector<cv::Mat> curr_imgs, vector<int> camera_group_labels) 
 {
 	cv::Mat image2D;
+	features_inter_cam.clear();
+	features_intra_cam.clear();
+
+	if(camera_group_labels.size() != curr_imgs.size())
+	{
+		CONSOLE.visual_processing_error(2);
+		return image2D;
+		
+	}
+
+	// (0) compute camera matches combinations
+	vector<vector<int> > camera_matches_comb = IMGFUNC.constrained_combination(camera_group_labels,false); // set: true for debugging
+
+	// (1) feature point extraction
 	vector<vector<KeyPoint> >  kpts_vec = feature_extraction_for_images(curr_imgs);
-	vector<cv::Mat> img_vec = draw_feature_points_for_images(curr_imgs,kpts_vec);
-	image2D = image_collage_maker(img_vec);
+	
+	
+	// (2) feature point tracking (inter-camera: across cameras, no memory)
+	features_inter_cam = feature_tracking_inter_camera(kpts_vec,curr_imgs,camera_matches_comb); //<--- ToDo: we're here
 
-	//ToDo: look up DescriptorExtractor
+	// (3) feature point tracking (intra-camera: across time, memory dependent)
+	//features_intra_cam = feature_tracking_intra_camera(kpts_vec,curr_imgs); // ToDo: think about what to result...?
+	
 
-	// ToDo: Replace the following baby script with real stuff!
-	/* 
-	int r=10; 
-	int c=24;
-	int b=1;  // B,G,R
-	Images2D.at<cv::Vec3b>(r,c)[b] = 27; */
+	// (4) manage display 
+	vector<cv::Mat> img_vec = draw_feature_points_for_images(curr_imgs,kpts_vec); // for (1): print out feature points
+	// for (2): use color to show the feature point matches between cameras
+	// for (3): use arrow to show the motion of feature points over time
+	image2D = image_collage_maker(img_vec); // merging images
+
+
+	// ToDo: think about addressing camera pose uncertainty ... in (2) and (3)
+
+
+	// [Other ideas and notes:]
+	// - Can look up DescriptorExtractor.
+	// - Do the following to access each element of image:
+	//   int r=10; int c=24; int b=1; // BGR
+	//   Images2D.at<cv::Vec3b>(r,c)[b] = 27;
+
 	return image2D;
 }
 
 
-PointCloud<PointXYZRGB> MyReconstr_Vision::process_model3D()
+PointCloud<PointXYZRGB> MyReconstr_Vision::process_model3D() // Next ToDo~
 {
 	PointCloud<PointXYZRGB> model3D;
-	// ToDo: Replace the following baby script with real stuff!
-	// ref: http://docs.pointclouds.org/trunk/classpcl_1_1_point_cloud.html
+	model3D.clear(); //
 
-	model3D.clear(); // Removes all points in a cloud and sets the width and height to 0. 
+	// (5) feature point registration (associate feature points IDs) - need to design a data structure for the 2D 3D point relation
+	// ToDo: what about accumulative error in camera pose? 
+	// when to modify the slow drift from true cam pose? in (5)? 
+	// when intra cam tracks are right but majority of points are classified as dynamic	
+
+	// (6) feature point classification (distinguish static and dynamic points)
+	 
+	// (7) map building --> could be put to process_model3D() function
+
+
+	// ToDo: Replace the following baby script with real stuff!
 	PointXYZRGB pt1, pt2;
 	pt1.x = 1;	pt1.y = 2;	pt1.z = 50;	pt1.r = 100;	pt1.g = 100;	pt1.b = 125;
 	pt2.x = 1;	pt2.y = 57;	pt2.z = 5;  	pt2.r = 223;	pt2.g = 12;	pt2.b = 50;
 	model3D.points.push_back(pt1);
 	model3D.points.push_back(pt2);
-	// to access each point: Model3D.points[0], Model3D.points[1]
+
+	// [Other ideas and notes:]
+	// - More info about point cloud: http://docs.pointclouds.org/trunk/classpcl_1_1_point_cloud.html
+	// - what does model3D.clear() do? 
+	//   Removes all points in a cloud and sets the width and height to 0.
+	// - Do the following to access each element of 3D model:
+	//   int pt_idx = 2;
+	//   Model3D.points[pt_idx].x , Model3D.points[pt_idx].y , Model3D.points[pt_idx].z
+	//   Model3D.points[pt_idx].r , Model3D.points[pt_idx].g , Model3D.points[pt_idx].b
 
 	return model3D;
+}
+
+
+vector<vector<KeyPoint> > MyReconstr_Vision::feature_tracking_inter_camera(vector<vector<KeyPoint> > kpts_vec, vector<cv::Mat> curr_imgs,vector<vector<int> > cam_comb_idx)
+{
+	// Goal: feature point tracking (inter-camera: across cameras, no memory)
+	//       use camera combo information to find feature point matches
+	// ref: https://github.com/Tetragramm/opencv_contrib/blob/master/modules/mapping3d/samples/computeMapping3d.cpp
+
+	vector<vector<KeyPoint> > kpts_inter_cam;
+
+	return kpts_inter_cam;
+	
 }
 
 

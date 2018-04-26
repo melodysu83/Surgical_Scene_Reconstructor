@@ -279,15 +279,20 @@ void *MyReconstr_Controller::reconstr_process()
 			this->IMAGE_STATE = IMAGE_START_PROCESSING;
 			this->MODEL_STATE = MODEL_START_PROCESSING;
 
+			// (0) camera grouping based on view overlap 
+			vector<int> camera_group_labels(CAMERA_COUNT,0); // initializes to the same group
+			// camera grouping. ToDo!!
+
 			// (1) feature extraction: compute for Images2D
-			Images2D = VISIONTOOL.process_image2D(CURRENT_IMAGES);
+			// (2) feature tracking and matching
+			Images2D = VISIONTOOL.process_image2D(CURRENT_IMAGES,camera_group_labels);
 
 			this->NEW_IMAGE_TO_PUB = true;
 
 			if(ready_to_reconstr_data && !USER_INPUT_PAUSE) // ToDo: do 3D reconstruction!
 			{
-				// (2) feature matching
-			
+
+				// 
 				// (3) camera grouping and map building...?
 
 				// (4) compute for Model3D

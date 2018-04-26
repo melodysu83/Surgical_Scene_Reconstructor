@@ -50,6 +50,7 @@ class MyReconstr_Display
 		void show_feature_detection_parameters_fast(int,bool);
 		void show_feature_detection_parameters_surf(double,int,int,bool);
 		void show_feature_detection_parameters_orb(int,float,int,int);
+		void show_all_camera_combinations(vector<vector<int> >);
 
 		void no_valid_camera_info_file(int,int,int);
 		void get_data_error(int);

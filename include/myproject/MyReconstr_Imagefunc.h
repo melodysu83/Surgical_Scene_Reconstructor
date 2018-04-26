@@ -19,6 +19,9 @@ class MyReconstr_Imagefunc
 		double norm_1(cv::Mat);		// compute the 1-norm of vector
 		double norm_2(cv::Mat);		// compute the 2-norm of vector
 
+		unsigned long int factorial(int);
+		vector<vector<int> > constrained_combination(vector<int>,bool);
+
 		// Common Abbreviations:
 		// Wpt: world point in the real world 		(size: 3x1 or 4x1)
 		// Mpt: map point in the reconstructed map 	(size: 3x1 or 4x1)

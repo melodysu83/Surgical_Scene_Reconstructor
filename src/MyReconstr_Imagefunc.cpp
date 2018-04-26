@@ -58,6 +58,68 @@ double MyReconstr_Imagefunc::norm_2(cv::Mat pt)	// compute the 2-norm of vector
 }
 
 
+unsigned long int MyReconstr_Imagefunc::factorial(int n)
+{
+	unsigned long int result = 1;
+	if(n <= 0)
+		CONSOLE.image_tool_function_error(29);
+	else if(n > 1)
+		result = n * factorial(n-1);
+
+	return result;
+}
+
+
+vector<vector<int> > MyReconstr_Imagefunc::constrained_combination(vector<int> camera_group_labels, bool show_combination_result)
+{
+	vector<vector<int> > combinations;
+
+	set<int> s( camera_group_labels.begin(), camera_group_labels.end() );
+	vector<int> camera_group_names;
+	camera_group_names.assign( s.begin(), s.end() );
+
+	int M = 0; // number of total combinations
+	int k = 2; // the number of cameras in each combination
+
+	int N = camera_group_labels.size(); // number of cameras
+	int n = camera_group_names.size();  // number of camera groups
+
+	vector<int> m(n); // number of cameras in each camera group
+	vector<vector<int> > camera_group_indices(n); // j,i th element: the ith camera index who belongs to group j
+
+	for(int j=0; j<n; j++)
+	{
+		for(int i=0; i<N; i++)
+			if(camera_group_labels[i] == camera_group_names[j])
+				camera_group_indices[j].push_back(i);
+
+		m[j] = camera_group_indices[j].size();
+		if(m[j] > k)
+			M = M + factorial(m[j])/(factorial(m[j]-k)*factorial(k)); 
+
+		for(int cam_1=0;cam_1<m[j];cam_1++)
+		for(int cam_2=cam_1+1;cam_2<m[j];cam_2++)
+		{
+			vector<int> tmp;
+			tmp.push_back(camera_group_indices[j][cam_1]);
+			tmp.push_back(camera_group_indices[j][cam_2]);
+			combinations.push_back(tmp);
+		}
+	}
+	
+	if(combinations.size() != M) // sanity check
+	{
+		CONSOLE.image_tool_function_error(30);
+		combinations.clear();
+	}
+
+	if(show_combination_result)
+		CONSOLE.show_all_camera_combinations(combinations); 
+
+	return combinations;
+}
+
+
 cv::Mat MyReconstr_Imagefunc::project_Wpt_to_Ipt(cv::Mat proj_mat,cv::Mat pt)	// projection operation
 {
 	if(pt.cols != 1 || (pt.rows != 3 && pt.rows != 4) || (proj_mat.rows != 2 && proj_mat.rows != 3))

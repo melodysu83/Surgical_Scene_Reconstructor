@@ -593,6 +593,20 @@ void MyReconstr_Display::show_feature_detection_parameters_orb(int param1,float 
 }
 
 
+void MyReconstr_Display::show_all_camera_combinations(vector<vector<int> > comb)
+{
+	cout<<endl<<"[CAMERA_MATCHES_COMBINATION] "<<endl;
+	for(int i=0; i<comb.size(); i++)
+	{
+		cout<<"comb "<<i<<": [";
+		for(int j=0; j<comb[i].size()-1;j++)
+			cout<<"cam_"<<comb[i][j]<<",";
+		cout<<"cam_"<<comb[i][comb[i].size()-1]<<"]"<<endl;
+	}
+	cout<<endl;
+}
+
+
 void MyReconstr_Display::no_valid_camera_info_file(int topic,int start,int end)
 {
 	if(topic == 1) // instrinsic
@@ -668,6 +682,9 @@ void MyReconstr_Display::visual_processing_error(int message_code)
 			break;
 		case 1:
 			cout<<endl<<"[Vision Error] 'image_collage_maker' function expect input to be a vector of same-sized images."<<endl<<endl;
+			break;
+		case 2:
+			cout<<endl<<"[Vision Error] 'process_image2D' dimension of two input arguements do not match."<<endl<<endl;
 			break;
 	}
 }
@@ -763,6 +780,12 @@ void MyReconstr_Display::image_tool_function_error(int message_code)
 			break;
 		case 28:
 			cout<<endl<<"[Image Tool Error] 'check_if_valid_Js' expects input size ((2k)x3)."<<endl<<endl;
+			break;
+		case 29:
+			cout<<endl<<"[Image Tool Error] 'factorial' expects positive integer input."<<endl<<endl;
+			break;
+		case 30:
+			cout<<endl<<"[Image Tool Error] 'constrained_combination' number of output pairs is not correct."<<endl<<endl;
 			break;
 	}
 }

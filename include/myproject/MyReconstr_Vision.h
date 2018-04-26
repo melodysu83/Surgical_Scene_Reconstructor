@@ -12,6 +12,9 @@ class MyReconstr_Vision
 		Ptr<FeatureDetector> detector_surf;
 		Ptr<FeatureDetector> detector_orb;
 
+		vector<vector<KeyPoint> >  features_intra_cam;
+		vector<vector<KeyPoint> >  features_inter_cam;
+
 		// for FAST_ALGO
 		int FEATURE_PARAM_INTENSITY_THRES;
 		bool FEATURE_PARAM_NON_MAX_SUPPRE;
@@ -54,8 +57,10 @@ class MyReconstr_Vision
 		vector<cv::Mat> draw_feature_points_for_images(vector<cv::Mat>,vector<vector<KeyPoint> >);
 		cv::Mat image_collage_maker(vector<cv::Mat>);
 
-		cv::Mat process_image2D(vector<cv::Mat>);
+		cv::Mat process_image2D(vector<cv::Mat>,vector<int>);
 		PointCloud<PointXYZRGB> process_model3D();
+
+		vector<vector<KeyPoint> > feature_tracking_inter_camera(vector<vector<KeyPoint> >,vector<cv::Mat>,vector<vector<int> >);
 };
 
 #endif
