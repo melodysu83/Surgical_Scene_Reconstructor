@@ -684,7 +684,19 @@ void MyReconstr_Display::visual_processing_error(int message_code)
 			cout<<endl<<"[Vision Error] 'image_collage_maker' function expect input to be a vector of same-sized images."<<endl<<endl;
 			break;
 		case 2:
-			cout<<endl<<"[Vision Error] 'process_image2D' dimension of two input arguements do not match."<<endl<<endl;
+			cout<<endl<<"[Vision Error] 'process_image2D' dimension of last two arguements doesn't match the camera count."<<endl<<endl;
+			break;
+		case 3:
+			cout<<endl<<"[Vision Error] 'process_image2D' dimension error for camera pose (should have 16 columns)."<<endl<<endl;
+			break;
+		case 4:
+			cout<<endl<<"[Vision Error] 'feature_tracking_intra_camera' encountered memory stack error (empty stack)."<<endl<<endl;
+			break;
+		case 5:
+			cout<<endl<<"[Vision Error] 'feature_tracking_intra_camera' camera count mismatch."<<endl<<endl;
+			break;
+		case 6:
+			cout<<endl<<"[Vision Error] 'feature_tracking_cross_camera' output match points dimension mismatched."<<endl<<endl;
 			break;
 	}
 }
@@ -787,7 +799,51 @@ void MyReconstr_Display::image_tool_function_error(int message_code)
 		case 30:
 			cout<<endl<<"[Image Tool Error] 'constrained_combination' number of output pairs is not correct."<<endl<<endl;
 			break;
+		case 31:
+			cout<<endl<<"[Image Tool Error] 'poses_to_transMats' elements of input vector are expected to be of size (1x6) or size (1x16)."<<endl<<endl;
+			break;
+		case 32:
+			cout<<endl<<"[Image Tool Error] 'poses_to_transMats' output is incorrect."<<endl<<endl;
+			break;
+		case 33:
+			cout<<endl<<"[Image Tool Error] 'transMats_to_poses' elements of input vector are expected to be of size (4x4)."<<endl<<endl;
+			break;
+		case 34:
+			cout<<endl<<"[Image Tool Error] 'transMats_to_poses' output is incorrect.."<<endl<<endl;
+			break;
+		case 35:
+			cout<<endl<<"[Image Tool Error] 'pose_to_transMat' expect input to have 6 entries."<<endl<<endl;
+			break;
+		case 36:
+			cout<<endl<<"[Image Tool Error] 'transMat_to_pose' expect input to be (4x4)."<<endl<<endl;
+			break;
+		case 37:
+			cout<<endl<<"[Image Tool Error] 'poses_to_projMats' elements of input vector are expected to be of size (1x6) or size (1x16)."<<endl<<endl;
+			break;
+		case 38:
+			cout<<endl<<"[Image Tool Error] 'poses_to_projMats' output is incorrect."<<endl<<endl;
+			break;
+		case 39:
+			cout<<endl<<"[Image Tool Error] 'projMats_to_poses' elements of input vector are expected to be of size (3x4)."<<endl<<endl;
+			break;
+		case 40:
+			cout<<endl<<"[Image Tool Error] 'projMats_to_poses' output is incorrect.."<<endl<<endl;
+			break;
+		case 41:
+			cout<<endl<<"[Image Tool Error] 'pose_to_projMat' expect input to have 6 entries."<<endl<<endl;
+			break;
+		case 42:
+			cout<<endl<<"[Image Tool Error] 'projMat_to_pose' expect input to be (3x4)."<<endl<<endl;
+			break;
+		case 43:
+			cout<<endl<<"[Image Tool Error] 'pose_to_transMat' expect input to have 16 entries."<<endl<<endl;
+			break;
+		case 44:
+			cout<<endl<<"[Image Tool Error] 'pose_to_projMat' expect input to have 16 entries."<<endl<<endl;
+			break;
+
 	}
+
 }
 
 

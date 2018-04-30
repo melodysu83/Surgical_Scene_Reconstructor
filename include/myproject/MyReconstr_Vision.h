@@ -12,8 +12,8 @@ class MyReconstr_Vision
 		Ptr<FeatureDetector> detector_surf;
 		Ptr<FeatureDetector> detector_orb;
 
-		vector<vector<KeyPoint> >  features_intra_cam;
-		vector<vector<KeyPoint> >  features_inter_cam;
+		vector<vector<Point2f> >  features_intra_cam;
+		vector<vector<Point2f> >  features_inter_cam;
 
 		// for FAST_ALGO
 		int FEATURE_PARAM_INTENSITY_THRES;
@@ -31,13 +31,21 @@ class MyReconstr_Vision
 		int FEATURE_PARAM_N_LEVELS;
 		int FEATURE_PARAM_EDGE_THRES;
 
+		cv::Size WIN_PYR;
+		vector<cv::Mat> CALI_INTRI_DATA;
+		vector<cv::Mat> CALI_DISTO_DATA;
+		bool MEMORY_RELEASE_FLAG;
+
 		MyReconstr_Imagefunc IMGFUNC;
 
 	public:
 		MyReconstr_Vision();
 		~MyReconstr_Vision();	
 
+		void load_intrinsic_matrices(vector<cv::Mat>);
+		void load_distortion_matrices(vector<cv::Mat>);
 		void reset_feature_parameters();
+		void reset_processing();
 		void set_feature_parameters_fast(int,bool);
 		void set_feature_parameters_surf(double,int,int,bool);
 		void set_feature_parameters_orb(int,float,int,int);
@@ -57,10 +65,13 @@ class MyReconstr_Vision
 		vector<cv::Mat> draw_feature_points_for_images(vector<cv::Mat>,vector<vector<KeyPoint> >);
 		cv::Mat image_collage_maker(vector<cv::Mat>);
 
-		cv::Mat process_image2D(vector<cv::Mat>,vector<int>);
+		cv::Mat process_image2D(vector<cv::Mat>,vector<vector<double> >,vector<int>);
 		PointCloud<PointXYZRGB> process_model3D();
 
-		vector<vector<KeyPoint> > feature_tracking_inter_camera(vector<vector<KeyPoint> >,vector<cv::Mat>,vector<vector<int> >);
+		vector<vector<Point2f> > feature_tracking_cross_camera(vector<vector<Point2f> >,vector<vector<cv::Mat> >,vector<cv::Mat>,vector<cv::Mat>,vector<cv::Mat>,vector<vector<int> >);
+		vector<vector<Point2f> > feature_tracking_inter_camera(vector<vector<Point2f> >,vector<vector<cv::Mat> >,vector<cv::Mat>,vector<vector<int> >);
+		vector<vector<Point2f> > feature_tracking_intra_camera(vector<vector<Point2f> >,vector<vector<cv::Mat> >,vector<cv::Mat>);
+		
 };
 
 #endif

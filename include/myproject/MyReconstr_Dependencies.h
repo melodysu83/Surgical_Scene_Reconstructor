@@ -64,6 +64,10 @@
 #define CONSOLE_LOOP_RATE   10     // in Hz
 #define IO_LOOP_RATE        30     // in Hz
 
+#define PROJMAT_DIMENSION_C 4	   // projection matrix
+#define PROJMAT_DIMENSION_R 3      
+#define TRANSMAT_DIMENSION  4      // homogeneous matrix
+#define CAM_POSE_DOF	    6      // x,y,z,roll,pitch,yaw
 #define CAM_POSE_SIZE       16     // number of entries of T matrix
 #define TIME_STEP_SIZE	    0.01   // in sec
 #define TIME_STAMP_COL	    2      // the column number in timestamp file that's in use
@@ -73,6 +77,10 @@
 #define IMAGE_FILE_DIGITS   5      // number of digits in the image files names
 
 #define DEFAULT_IMAGE_FUNC_SIGMA 3.0
+#define TRACEBACK_MEMORY_LENGTH  3
+
+#define FEATURE_TRACKING_PYR_WIN_SIZE 11
+#define FEATURE_TRACKING_PYR_MAX_LAYER 3
 
 // namespace declaration
 using namespace std;

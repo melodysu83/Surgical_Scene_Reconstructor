@@ -484,6 +484,20 @@ vector<vector<double> > MyReconstr_Storage::get_current_cam_poses(vector<double>
 }
 
 
+vector<cv::Mat> MyReconstr_Storage::get_intrinsic_matrices()
+{
+	vector<cv::Mat> result = CALI_INTRI_DATA;
+	return result;
+}
+
+
+vector<cv::Mat> MyReconstr_Storage::get_distortion_matrices()
+{
+	vector<cv::Mat> result = CALI_DISTO_DATA;
+	return result;
+}
+
+
 int MyReconstr_Storage::current_image_index_binary_search(int cam_idx,int row_start,int row_end)
 {
 	int row;

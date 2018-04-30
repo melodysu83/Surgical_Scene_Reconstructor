@@ -6,9 +6,12 @@
 class MyReconstr_Imagefunc
 {
 	private:
-		double sigma; // feature detection uncertainty
+		double sigma; 	// feature detection uncertainty
+		double epsilon;	// some small number to avoid invalid denominator
+		double pi;
 		cv::Mat I2;
 		cv::Mat I3;
+		cv::Mat I4;
 		MyReconstr_Display CONSOLE;
 	public:
 		MyReconstr_Imagefunc();
@@ -51,6 +54,15 @@ class MyReconstr_Imagefunc
 		cv::Mat compute_projection_jacobian_J(cv::Mat);			// the jacobian of projection function
 		cv::Mat to_scalable_form(cv::Mat);				// [x,y,z] --> [x,y,z,1]
 		cv::Mat to_normalized_form(cv::Mat);				// [x,y,z,1] --> [x,y,z]
+		cv::Mat pose_to_transMat(vector<double>,bool);
+		vector<double> transMat_to_pose(cv::Mat,bool);
+		vector<cv::Mat> poses_to_transMats(vector<vector<double> >,bool);
+		vector<vector<double> > transMats_to_poses(vector<cv::Mat>,bool);
+		cv::Mat pose_to_projMat(vector<double>,bool);
+		vector<double> projMat_to_pose(cv::Mat,bool);
+		vector<cv::Mat> poses_to_projMats(vector<vector<double> >,bool);
+		vector<vector<double> > projMats_to_poses(vector<cv::Mat>,bool);
+
 
 		double tukey_biweight_function(double);					// eq. (2) 
 		double tukey_biweight_function(double,double);

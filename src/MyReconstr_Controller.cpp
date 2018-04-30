@@ -53,6 +53,9 @@ void MyReconstr_Controller::load_dataset()
 {
 	DATABANK.load_dataset(); 
 	DATABANK.verify_loaded_dataset();
+
+	VISIONTOOL.load_intrinsic_matrices(DATABANK.get_intrinsic_matrices());
+	VISIONTOOL.load_distortion_matrices(DATABANK.get_distortion_matrices());
 }
 
 
@@ -281,11 +284,13 @@ void *MyReconstr_Controller::reconstr_process()
 
 			// (0) camera grouping based on view overlap 
 			vector<int> camera_group_labels(CAMERA_COUNT,0); // initializes to the same group
+			camera_group_labels[2] = 1;
+			camera_group_labels[3] = 1;
 			// camera grouping. ToDo!!
 
 			// (1) feature extraction: compute for Images2D
 			// (2) feature tracking and matching
-			Images2D = VISIONTOOL.process_image2D(CURRENT_IMAGES,camera_group_labels);
+			Images2D = VISIONTOOL.process_image2D(CURRENT_IMAGES,CURRENT_CAM_POSES,camera_group_labels);
 
 			this->NEW_IMAGE_TO_PUB = true;
 
@@ -374,6 +379,7 @@ void MyReconstr_Controller::clean_up_and_ready_for_restart()
 	// (3) clear class object variables
 	DATABANK.reset_data_pointers();
 	CONSOLE.reset_data_pointers();
+	VISIONTOOL.reset_processing();
 }
 
 
