@@ -369,7 +369,7 @@ vector<cv::Mat> MyReconstr_Vision::draw_feature_inter_cam_matches_for_images(vec
 		y=0;
 		img_vec_double[2*i] = img_vec[i](cv::Rect(x,y, sub_img_cols, sub_img_rows)).clone();
 
-		x=img_vec[i].cols-2-sub_img_cols;
+		x=img_vec[i].cols-1-sub_img_cols;
 		y=0;
 		img_vec_double[2*i+1] = img_vec[i](cv::Rect(x,y, sub_img_cols, sub_img_rows)).clone();
 	}
