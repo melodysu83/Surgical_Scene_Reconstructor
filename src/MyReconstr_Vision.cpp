@@ -471,11 +471,13 @@ cv::Mat MyReconstr_Vision::process_image2D(vector<cv::Mat> curr_imgs,vector<vect
 
 	// (4) feature point tracking (intra-camera: across time, memory dependent)
 	features_intra_cam = feature_tracking_intra_camera(features_raw,imgs_pyr,extrinsics); // ToDo: think about how to combine (3) and (4)
-	
+	// ToDo: we are here <---
+	// a. combine intra inter results
+	// b. make parameters for matching tunable
 
 	// (5) manage display 
-	vector<cv::Mat> img_vec = draw_feature_points_for_images(curr_imgs,kpts_vec);     					  // for (1): print out feature points
-	vector<cv::Mat> img_vec_intra = draw_feature_intra_cam_matches_for_images(img_vec,features_raw);   			  // for (4): draw feature point motion over time
+	vector<cv::Mat> img_vec = draw_feature_points_for_images(curr_imgs,kpts_vec);     			            // for (1): print out feature points
+	vector<cv::Mat> img_vec_intra = draw_feature_intra_cam_matches_for_images(img_vec,features_raw);   	            // for (4): draw feature point motion over time
 	vector<cv::Mat> img_vec_inter = draw_feature_inter_cam_matches_for_images(img_vec,features_raw,camera_matches_comb);// for (3): feature point matches across images
 	
 	vector<cv::Mat> img_vec_all = img_vec_inter;
