@@ -698,6 +698,18 @@ void MyReconstr_Display::visual_processing_error(int message_code)
 		case 6:
 			cout<<endl<<"[Vision Error] 'feature_tracking_cross_camera' output match points dimension mismatched."<<endl<<endl;
 			break;
+		case 7:
+			cout<<endl<<"[Vision Error] 'draw_feature_intra_cam_matches_for_images' number of images doesn't match number of feature point matches sets."<<endl<<endl;
+			break;
+		case 8:
+			cout<<endl<<"[Vision Error] 'draw_feature_inter_cam_matches_for_images' number of cam matches comb doesn't match number of inter cam feature matches sets."<<endl<<endl;
+			break;
+		case 9:
+			cout<<endl<<"[Vision Error] 'draw_feature_inter_cam_matches_for_images' number of images doesn't match number of feature point matches sets."<<endl<<endl;
+			break;
+		case 10:
+			cout<<endl<<"[Vision Error] 'draw_feature_intra_cam_matches' number of old and new feature points don't match."<<endl<<endl;
+			break;
 	}
 }
 

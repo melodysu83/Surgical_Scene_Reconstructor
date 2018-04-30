@@ -82,6 +82,8 @@
 #define FEATURE_TRACKING_PYR_WIN_SIZE 11
 #define FEATURE_TRACKING_PYR_MAX_LAYER 3
 
+#define DRAW_FEATURE_INTER_CAM_TEXT "Camera Combination: "
+#define DRAW_FEATURE_INTRA_CAM_TEXT "Camera "
 // namespace declaration
 using namespace std;
 using namespace cv;
@@ -155,4 +157,15 @@ enum FEATURE_ALGO_LIST{
 #define NUM_OF_FEATURE_PARAMETERS 10
 
 string FEATURE_ALGO_TO_STRING(FEATURE_ALGO_LIST);
+
+
+#define CV_COLOR_BLACK cv::Scalar(0,0,0)
+#define CV_COLOR_GRAY  cv::Scalar(180,180,180)
+#define CV_COLOR_WHITE cv::Scalar(255,255,255)
+#define CV_COLOR_RED   cv::Scalar(0, 0, 255)
+#define CV_COLOR_BLUE  cv::Scalar(255, 0, 0)
+#define CV_DRAW_TYPE      8
+#define CV_DRAW_THICKNESS 1
+#define CV_DRAW_RADIUS    3
+#define CV_DRAW_SHIFT     0
 #endif

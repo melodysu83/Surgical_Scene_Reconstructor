@@ -62,8 +62,12 @@ class MyReconstr_Vision
 		vector<vector<KeyPoint> >  feature_extraction_for_images(vector<cv::Mat>,FEATURE_ALGO_LIST);
 
 		cv::Mat draw_feature_points(cv::Mat,vector<KeyPoint>);
+		cv::Mat draw_feature_intra_cam_matches(cv::Mat,vector<Point2f>,vector<Point2f>);
+		cv::Mat draw_feature_inter_cam_matches(cv::Mat,cv::Mat,vector<Point2f>,vector<Point2f>);
 		vector<cv::Mat> draw_feature_points_for_images(vector<cv::Mat>,vector<vector<KeyPoint> >);
-		cv::Mat image_collage_maker(vector<cv::Mat>);
+		vector<cv::Mat> draw_feature_intra_cam_matches_for_images(vector<cv::Mat>,vector<vector<Point2f> > );
+		vector<cv::Mat> draw_feature_inter_cam_matches_for_images(vector<cv::Mat>,vector<vector<Point2f> > ,vector<vector<int> >);
+		cv::Mat image_collage_maker(vector<cv::Mat>,bool);
 
 		cv::Mat process_image2D(vector<cv::Mat>,vector<vector<double> >,vector<int>);
 		PointCloud<PointXYZRGB> process_model3D();

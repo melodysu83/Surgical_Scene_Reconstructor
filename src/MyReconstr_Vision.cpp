@@ -151,11 +151,11 @@ void MyReconstr_Vision::display_all_feature_algos(cv::Mat src)
 		Time t_end = ros::Time::now();
 		CONSOLE.show_runtime(ss,t_end-t_start);
 		img = draw_feature_points(src,kpts);
-		putText(img, ss, cvPoint(30,30), FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,0,0), 1, CV_AA);
+		putText(img, ss, cvPoint(30,30), FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_COLOR_BLACK, 1, CV_AA);
 		src_vec[i] = img.clone();
 		
 	}
-	img = image_collage_maker(src_vec);
+	img = image_collage_maker(src_vec,false);
 	imshow(OPENCV_IMSHOW_WINDOW_NAME,img);
 	cv::waitKey(30);
 }
@@ -230,6 +230,56 @@ cv::Mat MyReconstr_Vision::draw_feature_points(cv::Mat src,vector<KeyPoint> kpts
 }
 
 
+cv::Mat MyReconstr_Vision::draw_feature_intra_cam_matches(cv::Mat src,vector<Point2f> pts_old,vector<Point2f> pts_new)
+{
+	// Goal: use arrows to show feature point motions over time
+	cv::Mat img = src.clone();
+	
+	if(pts_old.size() == pts_new.size())
+	{
+		int pts_cnt = pts_new.size();
+		for(int i=0; i<pts_cnt; i++)
+		{
+			circle(img, pts_new[i], CV_DRAW_RADIUS, CV_COLOR_WHITE, CV_DRAW_THICKNESS);  
+			if(pts_old[i].x != -1)
+			{
+				circle(img, pts_old[i], CV_DRAW_RADIUS, CV_COLOR_GRAY, CV_DRAW_THICKNESS);  
+				line(img, pts_old[i], pts_new[i], CV_COLOR_GRAY, CV_DRAW_THICKNESS, CV_DRAW_TYPE, CV_DRAW_SHIFT); 
+			}
+		}
+	}
+	else
+		CONSOLE.visual_processing_error(10);
+	return img;
+}
+
+
+cv::Mat MyReconstr_Vision::draw_feature_inter_cam_matches(cv::Mat src1,cv::Mat src2,vector<Point2f> pts1,vector<Point2f> pts2)
+{
+	// Goal: use colors to show feature point matches between cams
+	cv::Mat img;
+	hconcat(src1,src2,img);
+	if(pts1.size() == pts2.size())
+	{
+		int pts_cnt = pts1.size();
+		for(int i=0; i<pts_cnt; i++)
+		{
+			Point2f pt1 = pts1[i];
+			Point2f pt2 = pts2[i]+Point2f(0.0f+src1.cols,0.0f);
+			circle(img, pt1, CV_DRAW_RADIUS, CV_COLOR_BLUE, CV_DRAW_THICKNESS);  
+			if(pts2[i].y != -1)
+			{
+				line(img, pt1,pt2, CV_COLOR_RED, CV_DRAW_THICKNESS, CV_DRAW_TYPE, CV_DRAW_SHIFT); 
+				circle(img, pt2, CV_DRAW_RADIUS, CV_COLOR_BLUE, CV_DRAW_THICKNESS);  
+			}
+		}
+	}
+	else
+		CONSOLE.visual_processing_error(10);
+	return img;
+}
+
+
 vector<cv::Mat> MyReconstr_Vision::draw_feature_points_for_images(vector<cv::Mat> src_vec,vector<vector<KeyPoint> > kpts_vec)
 {
 	vector<cv::Mat> img_vec;
@@ -253,15 +303,99 @@ vector<cv::Mat> MyReconstr_Vision::draw_feature_points_for_images(vector<cv::Mat
 }
 
 
-cv::Mat MyReconstr_Vision::image_collage_maker(vector<cv::Mat> src_vec)
+vector<cv::Mat> MyReconstr_Vision::draw_feature_intra_cam_matches_for_images(vector<cv::Mat> src_vec,vector<vector<Point2f> > features_raw)
+{
+	vector<cv::Mat> img_vec = src_vec;
+	if(src_vec.size() != features_intra_cam.size() || src_vec.size() != features_raw.size())
+	{
+		CONSOLE.visual_processing_error(7);
+		return img_vec;		
+	}
+
+	for(int i=0; i<src_vec.size(); i++)
+	{
+		cv::Mat img = draw_feature_intra_cam_matches(src_vec[i],features_intra_cam[i],features_raw[i]);
+		img_vec[i] = img.clone();
+		stringstream s;
+		s << (i);
+		string ss = DRAW_FEATURE_INTRA_CAM_TEXT+s.str();
+		putText(img_vec[i], ss, cvPoint(30,30), FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_COLOR_BLACK, 1, CV_AA);
+	}
+	
+	return img_vec;
+}
+
+
+vector<cv::Mat> MyReconstr_Vision::draw_feature_inter_cam_matches_for_images(vector<cv::Mat> src_vec,vector<vector<Point2f> > features_raw,vector<vector<int> > cam_matches_comb)
+{
+	vector<cv::Mat> img_vec(cam_matches_comb.size());
+	bool cant_draw = false;
+	if(cam_matches_comb.size() != features_inter_cam.size())
+	{
+		CONSOLE.visual_processing_error(8);
+		cant_draw = true;	
+	}
+	else if(src_vec.size() != features_raw.size())
+	{
+		CONSOLE.visual_processing_error(9);
+		cant_draw = true;
+	}	
+
+	for(int i=0; i<cam_matches_comb.size();i++)
+	{
+		int idx1 = cam_matches_comb[i][0];
+		int idx2 = cam_matches_comb[i][1];
+		if(cant_draw)
+			hconcat(src_vec[idx1],src_vec[idx2],img_vec[i]);
+		else
+		{
+			cv::Mat img = draw_feature_inter_cam_matches(src_vec[idx1],src_vec[idx2],features_raw[idx1],features_inter_cam[i]);
+			img_vec[i] = img.clone();
+		}	
+		stringstream s1,s2;
+		s1 << (idx1+1);
+		s2 << (idx2+1);
+		string ss = DRAW_FEATURE_INTER_CAM_TEXT+s1.str()+","+s2.str();
+		putText(img_vec[i], ss, cvPoint(30,30), FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_COLOR_BLACK, 1, CV_AA);		
+	}	
+	int x,y;
+	
+	vector<cv::Mat> img_vec_double(img_vec.size()*2);
+	for(int i=0; i<img_vec.size();i++)
+	{
+		int sub_img_cols = img_vec[i].cols/2;
+		int sub_img_rows = img_vec[i].rows;
+		x=0;
+		y=0;
+		img_vec_double[2*i] = img_vec[i](cv::Rect(x,y, sub_img_cols, sub_img_rows)).clone();
+
+		x=img_vec[i].cols-2-sub_img_cols;
+		y=0;
+		img_vec_double[2*i+1] = img_vec[i](cv::Rect(x,y, sub_img_cols, sub_img_rows)).clone();
+	}
+	return img_vec_double;
+}
+
+
+cv::Mat MyReconstr_Vision::image_collage_maker(vector<cv::Mat> src_vec,bool require_even_cols)
 {
 	int img_cnt = src_vec.size();
 	int rows = floor(sqrt(img_cnt));
 	int cols = rows;
+
+	if(require_even_cols && cols%2!=0)
+		cols = cols+1;
+	
 	cv::Mat img;
 
 	while(cols*rows<img_cnt)
-		cols = cols+1;
+	{
+		if(require_even_cols)
+			cols = cols+2;
+		else
+			cols = cols+1;
+	}
+
 	vector<cv::Mat> img_vec(cols*rows);
 	double img_scale = double(1.0*OPENCV_IMSHOW_WINDOW_SCALE/cols);
 
@@ -328,25 +462,28 @@ cv::Mat MyReconstr_Vision::process_image2D(vector<cv::Mat> curr_imgs,vector<vect
 
 	// (2) feature point extraction
 	vector<vector<KeyPoint> >  kpts_vec = feature_extraction_for_images(curr_imgs);
-	vector<vector<Point2f> >   kpts_vec_type2f(kpts_vec.size());
+	vector<vector<Point2f> >   features_raw(kpts_vec.size());
 	for(int i=0; i<kpts_vec.size(); i++)
-		cv::KeyPoint::convert(kpts_vec[i],kpts_vec_type2f[i],vector<int>());
+		cv::KeyPoint::convert(kpts_vec[i],features_raw[i],vector<int>());
 	
 	// (3) feature point tracking (inter-camera: across cameras, no memory)
-	features_inter_cam = feature_tracking_inter_camera(kpts_vec_type2f,imgs_pyr,extrinsics,camera_matches_comb); 
+	features_inter_cam = feature_tracking_inter_camera(features_raw,imgs_pyr,extrinsics,camera_matches_comb); 
 
 	// (4) feature point tracking (intra-camera: across time, memory dependent)
-	features_intra_cam = feature_tracking_intra_camera(kpts_vec_type2f,imgs_pyr,extrinsics); // ToDo: think about how to combine (3) and (4)
+	features_intra_cam = feature_tracking_intra_camera(features_raw,imgs_pyr,extrinsics); // ToDo: think about how to combine (3) and (4)
 	
 
 	// (5) manage display 
-	vector<cv::Mat> img_vec = draw_feature_points_for_images(curr_imgs,kpts_vec); // for (1): print out feature points
-	// for (3): use color to show the feature point matches between cameras//<--- ToDo: we're here
-	// for (4): use arrow to show the motion of feature points over time
-	image2D = image_collage_maker(img_vec); // merging images
+	vector<cv::Mat> img_vec = draw_feature_points_for_images(curr_imgs,kpts_vec);     					  // for (1): print out feature points
+	vector<cv::Mat> img_vec_intra = draw_feature_intra_cam_matches_for_images(img_vec,features_raw);   			  // for (4): draw feature point motion over time
+	vector<cv::Mat> img_vec_inter = draw_feature_inter_cam_matches_for_images(img_vec,features_raw,camera_matches_comb);// for (3): feature point matches across images
+	
+	vector<cv::Mat> img_vec_all = img_vec_inter;
+	img_vec_all.insert( img_vec_all.end(), img_vec_intra.begin(), img_vec_intra.end() );
+	image2D = image_collage_maker(img_vec_all,true); // merging images
 
 
-	// ToDo: think about addressing camera pose uncertainty ... in (2) and (3)
+	// ToDo: think about addressing camera pose uncertainty ... in (4) and (3)
 
 
 	// [Other ideas and notes:]
@@ -366,7 +503,7 @@ PointCloud<PointXYZRGB> MyReconstr_Vision::process_model3D() // Next ToDo~
 
 	// (6) feature point registration (associate feature points IDs) - need to design a data structure for the 2D 3D point relation
 	// ToDo: what about accumulative error in camera pose? 
-	// when to modify the slow drift from true cam pose? in (5)? 
+	// when to modify the slow drift from true cam pose? in (6)? 
 	// when intra cam tracks are right but majority of points are classified as dynamic	
 
 	// (7) feature point classification (distinguish static and dynamic points)
@@ -408,7 +545,7 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_cross_camera(vector
 		int cam2 = cam_comb_idx[i][1];
 		vector<Point2f> kpts_cam2;
 		Mat status, err;
-
+		
 		if(kpts[cam1].size() > 0)
 		{
 			cv::calcOpticalFlowPyrLK( imgs_pyr[cam1], imgs_pyr[cam2], kpts[cam1], kpts_cam2, status, err, WIN_PYR, FEATURE_TRACKING_PYR_MAX_LAYER);
@@ -418,9 +555,7 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_cross_camera(vector
 
 			for(int j=0; j<kpts[cam1].size();j++)
 			{
-				if(status.at<uchar>(j) == 1)
-					kpts_cam2[j] = kpts_cam2[j];
-				else
+				if(status.at<uchar>(j) != 1)
 				{
 					kpts_cam2[j].x = -1;
 					kpts_cam2[j].y = -1;
@@ -452,9 +587,9 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_intra_camera(vector
 	static queue<vector<vector<Point2f> > > old_kpts_vec_stack;
 	static queue<vector<vector<cv::Mat> > > old_imgs_pyr_stack;
 	static queue<vector<cv::Mat> > old_extrinsics_stack;
-	vector<vector<Point2f> > kpts_intra_cam;
 	int img_count = imgs_pyr.size();
 	int all_cameras_have_feature_points = 1;
+	vector<vector<Point2f> > kpts_intra_cam(img_count);
 
 	// (1) find tracking feature points from successive image
 	if(!MEMORY_RELEASE_FLAG)
@@ -494,12 +629,29 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_intra_camera(vector
 
 		}
 
-		old_kpts_vec.insert( old_kpts_vec.end(), kpts_vec.begin(), kpts_vec.end() );
-		old_imgs_pyr.insert(old_imgs_pyr.end(), imgs_pyr.begin(), imgs_pyr.end() );
-		old_extrinsics.insert(old_extrinsics.end(), extrinsics.begin(), extrinsics.end() );
+		vector<vector<Point2f> > all_kpts_vec = kpts_vec;
+		vector<vector<cv::Mat> > all_imgs_pyr = imgs_pyr;
+		vector<cv::Mat> all_extrinsics = extrinsics;
 
-		kpts_intra_cam = feature_tracking_cross_camera(old_kpts_vec,old_imgs_pyr,old_extrinsics,intrinsics,distortions,cam_comb_idx);
-		count = 0;
+		all_kpts_vec.insert( all_kpts_vec.end(), old_kpts_vec.begin(), old_kpts_vec.end() );
+		all_imgs_pyr.insert(all_imgs_pyr.end(), old_imgs_pyr.begin(), old_imgs_pyr.end() );
+		all_extrinsics.insert(all_extrinsics.end(), old_extrinsics.begin(), old_extrinsics.end() );
+
+		kpts_intra_cam = feature_tracking_cross_camera(all_kpts_vec,all_imgs_pyr,all_extrinsics,intrinsics,distortions,cam_comb_idx);
+		count = count-1;
+	}
+	else
+	{
+		for(int i=0; i<img_count;i++)
+		{
+			vector<Point2f> tmp(kpts_vec[i].size());
+			for(int j=0;j<tmp.size();j++)
+			{
+				tmp[j].x = -1;
+				tmp[j].y = -1;
+			}
+			kpts_intra_cam[i] = tmp;
+		}
 	}
 
 	// (2) save current images as history
@@ -513,11 +665,12 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_intra_camera(vector
 		count = count+1;
 	}
 
-	if(count == TRACEBACK_MEMORY_LENGTH)
+	if(count >= TRACEBACK_MEMORY_LENGTH)
 		MEMORY_RELEASE_FLAG = false;
+	else
+		MEMORY_RELEASE_FLAG = true;
 
 	return kpts_intra_cam;
-	
 }
 
 
