@@ -77,10 +77,6 @@
 #define IMAGE_FILE_DIGITS   5      // number of digits in the image files names
 
 #define DEFAULT_IMAGE_FUNC_SIGMA 3.0
-#define TRACEBACK_MEMORY_LENGTH  3
-
-#define FEATURE_TRACKING_PYR_WIN_SIZE 11
-#define FEATURE_TRACKING_PYR_MAX_LAYER 3
 
 #define DRAW_FEATURE_INTER_CAM_TEXT "Camera Combination: "
 #define DRAW_FEATURE_INTRA_CAM_TEXT "Camera "
@@ -158,7 +154,7 @@ enum FEATURE_ALGO_LIST{
 
 string FEATURE_ALGO_TO_STRING(FEATURE_ALGO_LIST);
 
-
+// openCV drawing parameters
 #define CV_COLOR_BLACK cv::Scalar(0,0,0)
 #define CV_COLOR_GRAY  cv::Scalar(180,180,180)
 #define CV_COLOR_WHITE cv::Scalar(255,255,255)
@@ -168,4 +164,15 @@ string FEATURE_ALGO_TO_STRING(FEATURE_ALGO_LIST);
 #define CV_DRAW_THICKNESS 1
 #define CV_DRAW_RADIUS    3
 #define CV_DRAW_SHIFT     0
+
+// feature tracking parameters
+#define FEATURE_TRACKING_PYR_MAX_LAYER 3
+#define FEATURE_TRACKING_MEMORY_LENGTH 3
+#define FEATURE_TRACKING_PYR_WIN_SIZE 11
+#define MAX_PYR_LAYER  9
+#define MIN_PYR_LAYER  1
+#define MAX_MEM_LENGTH 11
+#define MIN_MEM_LENGTH 1
+#define MAX_PYRWIN_SIZE 21
+#define MIN_PYRWIN_SIZE 5
 #endif

@@ -31,12 +31,19 @@ class MyReconstr_Vision
 		int FEATURE_PARAM_N_LEVELS;
 		int FEATURE_PARAM_EDGE_THRES;
 
-		cv::Size WIN_PYR;
+		// parameters for reconstruction
+		int pyramid_maxlayer;
+		int traceback_length;
+		int pyramid_winsize;
+		cv::Size pyramid_window;
+
 		vector<cv::Mat> CALI_INTRI_DATA;
 		vector<cv::Mat> CALI_DISTO_DATA;
-		bool MEMORY_RELEASE_FLAG;
+		bool MEMORY_INSUFFICIENT_FLAG;
+		bool MEMORY_DEEPCLEAR_FLAG;
 
 		MyReconstr_Imagefunc IMGFUNC;
+		pthread_mutex_t param_update_mutex;
 
 	public:
 		MyReconstr_Vision();
@@ -45,10 +52,12 @@ class MyReconstr_Vision
 		void load_intrinsic_matrices(vector<cv::Mat>);
 		void load_distortion_matrices(vector<cv::Mat>);
 		void reset_feature_parameters();
+		void reset_reconstr_parameters();
 		void reset_processing();
 		void set_feature_parameters_fast(int,bool);
 		void set_feature_parameters_surf(double,int,int,bool);
 		void set_feature_parameters_orb(int,float,int,int);
+		void set_reconstr_parameters(int,int,int);
 		void show_feature_parameters(FEATURE_ALGO_LIST);
 		void show_all_feature_parameters();
 		void create_feature_detectors();

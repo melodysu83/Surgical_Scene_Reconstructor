@@ -3,10 +3,11 @@
 MyReconstr_Vision::MyReconstr_Vision()
 {
 	this->MY_FEATURE_ALGO = DEFAULT_FEATURE_ALGO;
+	pthread_mutex_init( &param_update_mutex, NULL);
 
-	this->WIN_PYR = cv::Size(FEATURE_TRACKING_PYR_WIN_SIZE,FEATURE_TRACKING_PYR_WIN_SIZE);
-	reset_feature_parameters(); // set feature detection parameter values
-	reset_processing();	    // reset memlory release flag
+	reset_feature_parameters();  // set feature detection parameter values
+	reset_reconstr_parameters(); // set reconstruction parameter values
+	reset_processing();	     // reset memlory release flag
 }
 
 
@@ -53,10 +54,26 @@ void MyReconstr_Vision::reset_feature_parameters()
 	features_intra_cam.clear();
 }
 
+void MyReconstr_Vision::reset_reconstr_parameters()
+{
+	pthread_mutex_lock(&param_update_mutex);
+
+	if(this->pyramid_winsize != FEATURE_TRACKING_PYR_WIN_SIZE || pyramid_maxlayer != FEATURE_TRACKING_PYR_MAX_LAYER)
+		reset_processing(); // prevent exception at calcOpticalFlowPyrLK function
+
+	this->pyramid_maxlayer = FEATURE_TRACKING_PYR_MAX_LAYER;
+	this->traceback_length = FEATURE_TRACKING_MEMORY_LENGTH;
+	this->pyramid_winsize = FEATURE_TRACKING_PYR_WIN_SIZE;
+	pthread_mutex_unlock(&param_update_mutex);
+	CONSOLE.show_reconstr_parameters(pyramid_maxlayer,traceback_length,pyramid_winsize);
+
+}
+
 
 void MyReconstr_Vision::reset_processing()
 {
-	this->MEMORY_RELEASE_FLAG = true;
+	this->MEMORY_INSUFFICIENT_FLAG = true;
+	this->MEMORY_DEEPCLEAR_FLAG = true;
 }
 
 
@@ -88,6 +105,21 @@ void MyReconstr_Vision::set_feature_parameters_orb(int param1,float param2,int p
 	this->FEATURE_PARAM_EDGE_THRES = param4;
 
 	create_feature_detectors();
+}
+
+
+void MyReconstr_Vision::set_reconstr_parameters(int param1,int param2,int param3)
+{
+	pthread_mutex_lock(&param_update_mutex);
+
+	if(param3 != 0 || param1 != 0)
+		reset_processing(); // prevent exception at calcOpticalFlowPyrLK function
+
+	this->pyramid_maxlayer = max(MIN_PYR_LAYER,min(pyramid_maxlayer+param1,MAX_PYR_LAYER));
+	this->traceback_length = max(MIN_MEM_LENGTH,min(traceback_length+param2,MAX_MEM_LENGTH));
+	this->pyramid_winsize = max(MIN_PYRWIN_SIZE,min(pyramid_winsize+param3,MAX_PYRWIN_SIZE));
+	pthread_mutex_unlock(&param_update_mutex);
+	CONSOLE.show_reconstr_parameters(pyramid_maxlayer,traceback_length,pyramid_winsize);
 }
 
 
@@ -431,6 +463,8 @@ cv::Mat MyReconstr_Vision::image_collage_maker(vector<cv::Mat> src_vec,bool requ
 
 cv::Mat MyReconstr_Vision::process_image2D(vector<cv::Mat> curr_imgs,vector<vector<double> > curr_poses, vector<int> camera_group_labels) 
 {
+	pthread_mutex_lock(&param_update_mutex);
+
 	cv::Mat image2D;
 	features_inter_cam.clear();
 	features_intra_cam.clear();
@@ -457,9 +491,9 @@ cv::Mat MyReconstr_Vision::process_image2D(vector<cv::Mat> curr_imgs,vector<vect
 	
 	//     part3: get optic flow pyramid
 	vector<vector<Mat> > imgs_pyr(curr_imgs.size());
+	this->pyramid_window = cv::Size(pyramid_winsize,pyramid_winsize);
 	for(int i=0; i<curr_imgs.size(); i++)
-		cv::buildOpticalFlowPyramid( curr_imgs[i], imgs_pyr[i], WIN_PYR, FEATURE_TRACKING_PYR_MAX_LAYER); //ToDo: tune these parameters
-
+		cv::buildOpticalFlowPyramid( curr_imgs[i], imgs_pyr[i], pyramid_window, pyramid_maxlayer); 
 	// (2) feature point extraction
 	vector<vector<KeyPoint> >  kpts_vec = feature_extraction_for_images(curr_imgs);
 	vector<vector<Point2f> >   features_raw(kpts_vec.size());
@@ -474,6 +508,7 @@ cv::Mat MyReconstr_Vision::process_image2D(vector<cv::Mat> curr_imgs,vector<vect
 	// ToDo: we are here <---
 	// a. combine intra inter results
 	// b. make parameters for matching tunable
+	pthread_mutex_unlock(&param_update_mutex);
 
 	// (5) manage display 
 	vector<cv::Mat> img_vec = draw_feature_points_for_images(curr_imgs,kpts_vec);     			            // for (1): print out feature points
@@ -550,7 +585,7 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_cross_camera(vector
 		
 		if(kpts[cam1].size() > 0)
 		{
-			cv::calcOpticalFlowPyrLK( imgs_pyr[cam1], imgs_pyr[cam2], kpts[cam1], kpts_cam2, status, err, WIN_PYR, FEATURE_TRACKING_PYR_MAX_LAYER);
+			cv::calcOpticalFlowPyrLK( imgs_pyr[cam1], imgs_pyr[cam2], kpts[cam1], kpts_cam2, status, err, pyramid_window, pyramid_maxlayer);
 
 			if(kpts[cam1].size() != kpts_cam2.size())
 				CONSOLE.visual_processing_error(6);
@@ -594,7 +629,33 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_intra_camera(vector
 	vector<vector<Point2f> > kpts_intra_cam(img_count);
 
 	// (1) find tracking feature points from successive image
-	if(!MEMORY_RELEASE_FLAG)
+	if(MEMORY_INSUFFICIENT_FLAG)
+	{
+		if(MEMORY_DEEPCLEAR_FLAG)
+		{
+			count = 0;   			
+			queue<vector<vector<Point2f> > > empty_kpts_vec_stack;
+			queue<vector<vector<cv::Mat> > > empty_imgs_pyr_stack;
+			queue<vector<cv::Mat> > empty_extrinsics_stack;
+
+			swap( old_kpts_vec_stack, empty_kpts_vec_stack);
+			swap( old_imgs_pyr_stack, empty_imgs_pyr_stack);
+			swap( old_extrinsics_stack, empty_extrinsics_stack);
+			MEMORY_DEEPCLEAR_FLAG = false;
+		}
+
+		for(int i=0; i<img_count;i++)
+		{
+			vector<Point2f> tmp(kpts_vec[i].size());
+			for(int j=0;j<tmp.size();j++)
+			{
+				tmp[j].x = -1;
+				tmp[j].y = -1;
+			}
+			kpts_intra_cam[i] = tmp;
+		}
+	}
+	else
 	{
 		if(old_kpts_vec_stack.empty() || old_imgs_pyr_stack.empty() || old_extrinsics_stack.empty())
 		{
@@ -641,24 +702,13 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_intra_camera(vector
 
 		kpts_intra_cam = feature_tracking_cross_camera(all_kpts_vec,all_imgs_pyr,all_extrinsics,intrinsics,distortions,cam_comb_idx);
 		count = count-1;
-	}
-	else
-	{
-		for(int i=0; i<img_count;i++)
-		{
-			vector<Point2f> tmp(kpts_vec[i].size());
-			for(int j=0;j<tmp.size();j++)
-			{
-				tmp[j].x = -1;
-				tmp[j].y = -1;
-			}
-			kpts_intra_cam[i] = tmp;
-		}
+		
 	}
 
 	// (2) save current images as history
 	for(int i=0;i<img_count;i++)
 		all_cameras_have_feature_points = all_cameras_have_feature_points*kpts_vec[i].size();
+
 	if(all_cameras_have_feature_points != 0)
 	{
 		old_kpts_vec_stack.push(kpts_vec);
@@ -667,10 +717,7 @@ vector<vector<Point2f> > MyReconstr_Vision::feature_tracking_intra_camera(vector
 		count = count+1;
 	}
 
-	if(count >= TRACEBACK_MEMORY_LENGTH)
-		MEMORY_RELEASE_FLAG = false;
-	else
-		MEMORY_RELEASE_FLAG = true;
+	MEMORY_INSUFFICIENT_FLAG = (count >= traceback_length) ? false : true;
 
 	return kpts_intra_cam;
 }

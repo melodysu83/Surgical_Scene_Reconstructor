@@ -74,6 +74,7 @@ void MyReconstr_Controller::init_sys()
 	this->GOODBYE = false;
 	this->USER_INPUT_PAUSE = false;
 	this->USER_INPUT_SHOWSTATUS = false;
+	this->USER_INPUT_RECONSTR_PARAM_UPDATE = false;
 	
 	this->MY_FEATURE_ALGO = DEFAULT_FEATURE_ALGO;
 	CONSOLE.set_feature_detection_algo(MY_FEATURE_ALGO);
@@ -163,6 +164,7 @@ void *MyReconstr_Controller::console_process()
 				SYSTEM_STATE = CONSOLE.check_user_selection_d(theKey);
 				USER_INPUT_PAUSE = CONSOLE.check_if_paused();
 				USER_INPUT_SHOWSTATUS = CONSOLE.check_if_showstatus();
+				USER_INPUT_RECONSTR_PARAM_UPDATE = CONSOLE.check_if_reconstr_param_changed();
 				break;	
 
 			case SYSTEM_RECONSTR_QUIET_MODE: // 4	
@@ -170,6 +172,7 @@ void *MyReconstr_Controller::console_process()
 				SYSTEM_STATE = CONSOLE.check_user_selection_r(theKey,SYSTEM_STATE);
 				USER_INPUT_PAUSE = CONSOLE.check_if_paused();
 				USER_INPUT_SHOWSTATUS = CONSOLE.check_if_showstatus();
+				USER_INPUT_RECONSTR_PARAM_UPDATE = CONSOLE.check_if_reconstr_param_changed();
 				break;	
 
 			case SYSTEM_RECONSTR_DEBUG_MODE: // 5	
@@ -177,10 +180,10 @@ void *MyReconstr_Controller::console_process()
 				SYSTEM_STATE = CONSOLE.check_user_selection_r(theKey,SYSTEM_STATE);
 				USER_INPUT_PAUSE = CONSOLE.check_if_paused();
 				USER_INPUT_SHOWSTATUS = CONSOLE.check_if_showstatus();
+				USER_INPUT_RECONSTR_PARAM_UPDATE = CONSOLE.check_if_reconstr_param_changed();
 				break;	
 
 			case SYSTEM_DATA_ENDING: // 6	
-				
 				CONSOLE.display_wrapping_up_message();
 				final_result_publish_and_display();
 				SYSTEM_STATE = SYSTEM_SHOW_MENU;
@@ -212,6 +215,18 @@ void *MyReconstr_Controller::console_process()
 			CONSOLE.show_camera_pose(SYSTEM_TIME,CURRENT_CAM_POSES);
 		}
 
+		if(USER_INPUT_RECONSTR_PARAM_UPDATE)
+		{
+			if(CONSOLE.check_if_reconstr_param_reset())
+				VISIONTOOL.reset_reconstr_parameters();
+			else
+			{
+				int p1,p2,p3; 
+				CONSOLE.get_reconstr_param_changes(&p1,&p2,&p3);
+				VISIONTOOL.set_reconstr_parameters(p1,p2,p3);
+			}
+		}
+
 		loop_rate.sleep();
 		ros::spinOnce();  
 	}
@@ -240,7 +255,7 @@ void *MyReconstr_Controller::io_process()
 			load_currect_images_and_pose();
 
 			// (2) update system time
-			this->SYSTEM_TIME = this->SYSTEM_TIME+0.01; //ToDo: Find a way to determine termination
+			this->SYSTEM_TIME = this->SYSTEM_TIME+0.01; // Termination handeling: DATABANK.check_data_ending()
 
 			this->IMAGE_STATE = IMAGE_DONE_LOADING;
 		}
@@ -365,6 +380,7 @@ void MyReconstr_Controller::clean_up_and_ready_for_restart()
 	// (1) clean up all the variables ToDo!!
 	this->USER_INPUT_PAUSE = false;
 	this->USER_INPUT_SHOWSTATUS = false;
+	this->USER_INPUT_RECONSTR_PARAM_UPDATE = false;
 	this->NEW_IMAGE_TO_PUB = false;
 	this->NEW_MODEL_TO_PUB = false;
 

@@ -11,6 +11,8 @@ class MyReconstr_Display
 		bool USER_INPUT_SHOW_FEATURE_DETECTION_PARAMS;
 		bool USER_INPUT_SHOW_ALL_FEATURE_DETECTION_PARAMS;
 		bool USER_INPUT_FEATURE_DETECTION_PARAMS_UPDATED;
+		bool USER_INPUT_RECONSTR_PARAM_RESET;
+		bool USER_INPUT_RECONSTR_PARAM_UPDATE;
 		FEATURE_ALGO_LIST MY_FEATURE_ALGO; 
 
 		// for FAST_ALGO
@@ -29,6 +31,11 @@ class MyReconstr_Display
 		int FEATURE_PARAM_N_LEVELS;
 		int FEATURE_PARAM_EDGE_THRES;
 
+		// parameters for reconstruction
+		int delta_pyramid_maxlayer;
+		int delta_traceback_length;
+		int delta_pyramid_winsize;
+
 	public:
 		MyReconstr_Display();
 		~MyReconstr_Display();
@@ -38,7 +45,9 @@ class MyReconstr_Display
 		void initialize_feature_detection_parameters();
 		void load_feature_detection_parameters(); 
 		void reset_feature_detection_parameters(); 
+		void reset_reconstruction_parameters();
 		void get_feature_detection_parameters(int*,bool*,double*,int*,int*,bool*,int*,float*,int*,int*);
+		void get_reconstr_param_changes(int*,int*,int*);
 		void set_feature_detection_algo(FEATURE_ALGO_LIST);
 		FEATURE_ALGO_LIST get_feature_detection_algo();
 		
@@ -50,6 +59,7 @@ class MyReconstr_Display
 		void show_feature_detection_parameters_fast(int,bool);
 		void show_feature_detection_parameters_surf(double,int,int,bool);
 		void show_feature_detection_parameters_orb(int,float,int,int);
+		void show_reconstr_parameters(int,int,int);
 		void show_all_camera_combinations(vector<vector<int> >);
 
 		void no_valid_camera_info_file(int,int,int);
@@ -62,6 +72,8 @@ class MyReconstr_Display
 		bool check_if_display_feature_detection_parameters();
 		bool check_if_display_all_feature_detection_parameters();
 		bool check_if_feature_detection_parameters_updated();
+		bool check_if_reconstr_param_reset(); 
+		bool check_if_reconstr_param_changed(); 
 
 		void display_menu();
 		void display_feature_menu();

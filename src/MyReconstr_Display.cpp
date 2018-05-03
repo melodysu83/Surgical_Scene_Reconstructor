@@ -7,35 +7,18 @@ MyReconstr_Display::MyReconstr_Display()
 	this->USER_INPUT_SHOW_FEATURE_DETECTION_PARAMS = false;
 	this->USER_INPUT_SHOW_ALL_FEATURE_DETECTION_PARAMS = false;
 	this->USER_INPUT_FEATURE_DETECTION_PARAMS_UPDATED = false;
+	this->USER_INPUT_RECONSTR_PARAM_RESET = false;
+	this->USER_INPUT_RECONSTR_PARAM_UPDATE = false;
 
 	this->CAMERA_COUNT = 0;
 	this->MY_FEATURE_ALGO = DEFAULT_FEATURE_ALGO;
-	initialize_feature_detection_parameters();
+	reset_feature_detection_parameters();
+	reset_reconstruction_parameters();
 }
 
 
 MyReconstr_Display::~MyReconstr_Display()
 {
-}
-
-
-void  MyReconstr_Display::initialize_feature_detection_parameters()
-{
-	// for FAST_ALGO
-	this->FEATURE_PARAM_INTENSITY_THRES = DEFAULT_FEATURE_PARAM_INTENSITY_THRES;
-	this->FEATURE_PARAM_NON_MAX_SUPPRE = DEFAULT_FEATURE_PARAM_NON_MAX_SUPPRE;	
-
-	// for SURF_ALGO
-	this->FEATURE_PARAM_HESSIAN_THRES = DEFAULT_FEATURE_PARAM_HESSIAN_THRES;
-	this->FEATURE_PARAM_N_PYRAMIDS = DEFAULT_FEATURE_PARAM_N_PYRAMIDS;
-	this->FEATURE_PARAM_N_PYRAMID_LAYERS = DEFAULT_FEATURE_PARAM_N_PYRAMID_LAYERS;
-	this->FEATURE_PARAM_DESCRIPTOR_EXTENDED = DEFAULT_FEATURE_PARAM_DESCRIPTOR_EXTENDED;
-
-	// for ORB_ALGO
-	this->FEATURE_PARAM_N_FEATURES = DEFAULT_FEATURE_PARAM_N_FEATURES;
-	this->FEATURE_PARAM_SCALE = DEFAULT_FEATURE_PARAM_SCALE;
-	this->FEATURE_PARAM_N_LEVELS = DEFAULT_FEATURE_PARAM_N_LEVELS;
-	this->FEATURE_PARAM_EDGE_THRES = DEFAULT_FEATURE_PARAM_EDGE_THRES;
 }
 
 
@@ -421,6 +404,15 @@ void MyReconstr_Display::reset_feature_detection_parameters()
 }
 
 
+void  MyReconstr_Display::reset_reconstruction_parameters()
+{
+	// parameters for reconstruction
+	this->delta_pyramid_maxlayer = 0;
+	this->delta_traceback_length = 0;
+	this->delta_pyramid_winsize = 0;	
+}
+
+
 void MyReconstr_Display::get_feature_detection_parameters(int* p1,bool* p2,double* p3,int* p4,int* p5,bool* p6,int* p7,float* p8,int* p9,int* p10)
 {
 	*p1 = FEATURE_PARAM_INTENSITY_THRES;
@@ -433,6 +425,20 @@ void MyReconstr_Display::get_feature_detection_parameters(int* p1,bool* p2,doubl
 	*p8 = FEATURE_PARAM_SCALE;
 	*p9 = FEATURE_PARAM_N_LEVELS;
 	*p10 = FEATURE_PARAM_EDGE_THRES;
+}
+
+
+void MyReconstr_Display::get_reconstr_param_changes(int* p1,int* p2,int* p3)
+{
+	int p1_tmp = delta_pyramid_maxlayer;
+	int p2_tmp = delta_traceback_length;
+	int p3_tmp = delta_pyramid_winsize;
+
+	*p1 = p1_tmp;
+	*p2 = p2_tmp;
+	*p3 = p3_tmp;
+
+	reset_reconstruction_parameters();
 }
 
 
@@ -590,6 +596,19 @@ void MyReconstr_Display::show_feature_detection_parameters_orb(int param1,float 
 	cout<<"FEATURE_PARAM_SCALE:      "<<param2<<endl;
 	cout<<"FEATURE_PARAM_N_LEVELS:   "<<param3<<endl;
 	cout<<"FEATURE_PARAM_EDGE_THRES: "<<param4<<endl;
+}
+
+
+void MyReconstr_Display::show_reconstr_parameters(int param1,int param2,int param3)
+{
+	string s1 = (param1 == FEATURE_TRACKING_PYR_MAX_LAYER)?" (default value)":"";
+	string s2 = (param2 == FEATURE_TRACKING_MEMORY_LENGTH)?" (default value)":"";
+	string s3 = (param3 == FEATURE_TRACKING_PYR_WIN_SIZE)?" (default value)":"";
+
+	cout<<endl<<"[RECONSTRUCTION PARAMETERS] "<<endl;
+	cout<<"pyramid_maxlayer: "<<param1<<s1<<endl;
+	cout<<"traceback_length: "<<param2<<s2<<endl;
+	cout<<"pyramid_winsize:  "<<param3<<s3<<endl<<endl;
 }
 
 
@@ -863,6 +882,9 @@ void MyReconstr_Display::reset_data_pointers()
 {
 	this->USER_INPUT_PAUSE = false;
 	this->USER_INPUT_SHOWSTATUS = false;
+	this->USER_INPUT_RECONSTR_PARAM_RESET = false;
+	this->USER_INPUT_RECONSTR_PARAM_UPDATE = false;
+	reset_reconstruction_parameters();
 }
 
 
@@ -916,6 +938,26 @@ bool MyReconstr_Display::check_if_feature_detection_parameters_updated()
 	return check;
 }
 
+bool MyReconstr_Display::check_if_reconstr_param_reset()
+{
+	bool check = this->USER_INPUT_RECONSTR_PARAM_RESET;
+
+	if(this->USER_INPUT_RECONSTR_PARAM_RESET)
+		this->USER_INPUT_RECONSTR_PARAM_RESET = false;
+
+	return check;
+}
+
+
+bool MyReconstr_Display::check_if_reconstr_param_changed()
+{
+	bool check = this->USER_INPUT_RECONSTR_PARAM_UPDATE;
+	if(this->USER_INPUT_RECONSTR_PARAM_UPDATE)
+		this->USER_INPUT_RECONSTR_PARAM_UPDATE = false;
+
+	return check;
+}
+
 
 void MyReconstr_Display::display_menu()
 {
@@ -960,7 +1002,15 @@ void MyReconstr_Display::display_sub_menu_d()
 	cout<<"--------------------Sub Menu: Data Display-------------------"<<endl;
 	cout<<"(S): Show current status."<<endl;
 	cout<<"(R): Toggle system pause and resume."<<endl;
-	cout<<"(B): Quit and go back."<<endl<<endl<<endl;
+	cout<<"(B): Quit and go back."<<endl<<endl;
+	cout<<"-----Below are for parameter tuning--------"<<endl;
+	cout<<"(A): Increase 'pyramid_maxlayer' parameter."<<endl;
+	cout<<"(Z): Decrease 'pyramid_maxlayer' parameter."<<endl;
+	cout<<"(D): Increase 'traceback_length' parameter."<<endl;
+	cout<<"(C): Decrease 'traceback_length' parameter."<<endl;
+	cout<<"(F): Increase 'pyramid_winsize' parameter."<<endl;
+	cout<<"(V): Decrease 'pyramid_winsize' parameter."<<endl;
+	cout<<"(X): Reset all reconstruction parameters."<<endl<<endl<<endl;
 }
 
 
@@ -971,7 +1021,15 @@ void MyReconstr_Display::display_sub_menu_r()
 	cout<<"(S): Show current status."<<endl;	
 	cout<<"(T): Toggle quiet mode and debug mode."<<endl;
 	cout<<"(R): Toggle system pause and resume."<<endl;
-	cout<<"(B): Quit and go back."<<endl<<endl<<endl;
+	cout<<"(B): Quit and go back."<<endl<<endl;
+	cout<<"-----Below are for parameter tuning--------"<<endl;
+	cout<<"(A): Increase 'pyramid_maxlayer' parameter."<<endl;
+	cout<<"(Z): Decrease 'pyramid_maxlayer' parameter."<<endl;
+	cout<<"(D): Increase 'traceback_length' parameter."<<endl;
+	cout<<"(C): Decrease 'traceback_length' parameter."<<endl;
+	cout<<"(F): Increase 'pyramid_winsize' parameter."<<endl;
+	cout<<"(V): Decrease 'pyramid_winsize' parameter."<<endl;
+	cout<<"(X): Reset all reconstruction parameters."<<endl<<endl<<endl;
 }
 
 
@@ -1071,7 +1129,49 @@ SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_d(int theKey)
 				cout<<endl<<"'b' Key Pressed: Quit and go back."<<endl;
 				sys_status = SYSTEM_DATA_ENDING;
 				break;
-
+			case 97: // 'a' or 'A' : Increase 'pyramid_maxlayer' parameter.
+			case 65:
+				cout<<endl<<"'a' Key Pressed: Increase 'pyramid_maxlayer' parameter."<<endl;
+				this->delta_pyramid_maxlayer = 2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 122: // 'z' or 'Z' : Derease 'pyramid_maxlayer' parameter.
+			case 90:
+				cout<<endl<<"'z' Key Pressed: Decrease 'pyramid_maxlayer' parameter."<<endl;
+				this->delta_pyramid_maxlayer = -2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 100: // 'd' or 'D' : Increase 'traceback_length' parameter.
+			case 68:
+				cout<<endl<<"'d' Key Pressed: Increase 'traceback_length' parameter."<<endl;
+				this->delta_traceback_length = 2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 99: // 'c' or 'C' : Decrease 'traceback_length' parameter.
+			case 67:
+				cout<<endl<<"'c' Key Pressed: Decrease 'traceback_length' parameter."<<endl;
+				this->delta_traceback_length = -2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 102: // 'f' or 'F' : Increase 'pyramid_winsize' parameter.
+			case 70:
+				cout<<endl<<"'f' Key Pressed: Increase 'pyramid_winsize' parameter."<<endl;
+				this->delta_pyramid_winsize = 2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 118: // 'v' or 'V' : Decrease 'pyramid_winsize' parameter.
+			case 86:
+				cout<<endl<<"'v' Key Pressed: Decrease 'pyramid_winsize' parameter."<<endl;
+				this->delta_pyramid_winsize = -2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 120: // 'x' or 'X' : Reset all reconstruction parameters.
+			case 88:
+				cout<<endl<<"'x' Key Pressed: Reset all reconstruction parameters."<<endl;
+				reset_reconstruction_parameters();
+				this->USER_INPUT_RECONSTR_PARAM_RESET = true;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
 			default:
 				cout<<"'other' Key Pressed: Unrecognized option."<<endl;
 				break;
@@ -1108,6 +1208,7 @@ SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_r(int theKey, SYSTEM
 					destroyWindow(OPENCV_IMSHOW_WINDOW_NAME);
 					namedWindow(OPENCV_IMSHOW_WINDOW_NAME);
 				}
+				display_sub_menu_r();
 				break;
 
 			case 114: // 'r' or 'R' : toggle system pause and resume.
@@ -1127,6 +1228,49 @@ SYSTEM_STATUS_LIST MyReconstr_Display::check_user_selection_r(int theKey, SYSTEM
 				sys_status = SYSTEM_DATA_ENDING;
 				break;
 
+			case 97: // 'a' or 'A' : Increase 'pyramid_maxlayer' parameter.
+			case 65:
+				cout<<endl<<"'a' Key Pressed: Increase 'pyramid_maxlayer' parameter."<<endl;
+				this->delta_pyramid_maxlayer = 2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 122: // 'z' or 'Z' : Derease 'pyramid_maxlayer' parameter.
+			case 90:
+				cout<<endl<<"'z' Key Pressed: Decrease 'pyramid_maxlayer' parameter."<<endl;
+				this->delta_pyramid_maxlayer = -2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 100: // 'd' or 'D' : Increase 'traceback_length' parameter.
+			case 68:
+				cout<<endl<<"'d' Key Pressed: Increase 'traceback_length' parameter."<<endl;
+				this->delta_traceback_length = 2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 99: // 'c' or 'C' : Decrease 'traceback_length' parameter.
+			case 67:
+				cout<<endl<<"'c' Key Pressed: Decrease 'traceback_length' parameter."<<endl;
+				this->delta_traceback_length = -2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 102: // 'f' or 'F' : Increase 'pyramid_winsize' parameter.
+			case 70:
+				cout<<endl<<"'f' Key Pressed: Increase 'pyramid_winsize' parameter."<<endl;
+				this->delta_pyramid_winsize = 2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 118: // 'v' or 'V' : Decrease 'pyramid_winsize' parameter.
+			case 86:
+				cout<<endl<<"'v' Key Pressed: Decrease 'pyramid_winsize' parameter."<<endl;
+				this->delta_pyramid_winsize = -2;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
+			case 120: // 'x' or 'X' : Reset all reconstruction parameters.
+			case 88:
+				cout<<endl<<"'x' Key Pressed: Reset all reconstruction parameters."<<endl;
+				reset_reconstruction_parameters();
+				this->USER_INPUT_RECONSTR_PARAM_RESET = true;
+				this->USER_INPUT_RECONSTR_PARAM_UPDATE = true;
+				break;
 			default:
 				cout<<"'other' Key Pressed: Unrecognized option."<<endl;
 				break;

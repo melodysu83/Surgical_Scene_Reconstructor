@@ -13,6 +13,7 @@ class MyReconstr_Controller
 		bool GOODBYE;
 		bool USER_INPUT_PAUSE;
 		bool USER_INPUT_SHOWSTATUS;
+		bool USER_INPUT_RECONSTR_PARAM_UPDATE;
 		bool NEW_IMAGE_TO_PUB;
 		bool NEW_MODEL_TO_PUB;
 
