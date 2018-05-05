@@ -75,7 +75,7 @@ class MyReconstr_Point3D
 		vector<bool> visible;     // whether it's visible from that particular camera a vector of length == camera_count
 		int camera_cnt;    // the number of cameras
 		int childless_cnt; // how long has the point been childless
-		int type;	   // static? moving? deforming?
+		int type;	   // static? moving? deforming? 
 		Point3f pt;
 		vector<MyReconstr_Point2D*> img_pt;  // img_pt[size = camera count], each of them is an address for the point2D
 	public:
