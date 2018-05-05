@@ -112,14 +112,18 @@ void MyReconstr_Storage::load_dataset()
 		// load timestamp
 		vector<vector<double> > tme_stamp_data;      
 		ifstream tme_stamp_file(TME_STAMP_FILE[i-1].c_str()); 
-		
-		while (tme_stamp_file.good() )
+
+		if(!tme_stamp_file.good())
+			CONSOLE.display_system_message(12);
+
+		while (tme_stamp_file.good())
 		{
 			vector<double> row; 
 			string line;
         		getline(tme_stamp_file, line);
 			if ( !tme_stamp_file.good() )
             			break;
+
 			stringstream iss(line);
 			for (int col = 0; col < 3; col++) 
 			{
@@ -131,13 +135,18 @@ void MyReconstr_Storage::load_dataset()
 				row.push_back(val); 
 			}
 			tme_stamp_data.push_back(row);
+			
 		}
+		
 		TME_STAMP_DATA.push_back(tme_stamp_data);
 
 		// load campose
 		vector<vector<double> > cam_pose_data;      
 		ifstream cam_pose_file(CAM_POSE_FILE[i-1].c_str()); 
-		
+
+		if(!cam_pose_file.good())
+			CONSOLE.display_system_message(13);
+
 		while (cam_pose_file.good() )
 		{
 			vector<double> row; 
@@ -163,6 +172,9 @@ void MyReconstr_Storage::load_dataset()
 		size_t start,end;
 		ifstream cam_cali_file(CAM_CALI_FILE[i-1].c_str());// this is good!
 		
+		if(!cam_cali_file.good())
+			CONSOLE.display_system_message(14);
+
 		stringstream buffer;
 		string buf,cam_cali_string,data1,data2;
 		vector<string> tokens1;
@@ -284,7 +296,6 @@ cv::Mat MyReconstr_Storage::get_random_image()
 {
 	int cam_choice = rand() % CAMERA_COUNT;
 	vector<cv::Mat> imgs = get_random_images();
-
 	cv::Mat img = imgs[cam_choice].clone();
 	return img;
 }
@@ -295,18 +306,16 @@ vector<cv::Mat> MyReconstr_Storage::get_random_images()
 	bool success = false;
 	int out_of_bound_count = 0;
 	vector<cv::Mat> current_images;
-	
 
 	while(!success)
 	{
 		success = true;
 		current_images.clear();
 		double time_now = double(rand() % 6000)/10.0;
-
 		for(int i=0; i<CAMERA_COUNT; i++)
 		{
 			int row_max = TME_STAMP_DATA[i].size();
-
+			
 			// (1) filter out weird system time
 			if(time_now > TME_STAMP_DATA[i][row_max-1][TIME_STAMP_COL])
 			{
@@ -514,7 +523,6 @@ int MyReconstr_Storage::current_image_index_binary_search(int cam_idx,int row_st
 	}
 	
 	row = current_image_index_find_closest(cam_idx,row_start);
-
 	return row;
 }
 

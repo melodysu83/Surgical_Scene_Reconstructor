@@ -113,7 +113,6 @@ vector<vector<int> > MyReconstr_Imagefunc::constrained_combination(vector<int> c
 	
 	if(combinations.size() != M) // sanity check
 	{
-		cout<<M<<endl;
 		CONSOLE.image_tool_function_error(30);
 		combinations.clear();
 	}

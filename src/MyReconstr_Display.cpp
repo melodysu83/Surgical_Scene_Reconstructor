@@ -526,6 +526,21 @@ void MyReconstr_Display::display_system_message(int message_code)
 		case 11:
 			cout<<endl<<"[System Info] Invalid MY_FEATURE_ALGO settings."<<endl<<endl;
 			break;
+		case 12:
+			cout<<endl<<"[Fatal Error] Cannot open timestamp file. Please recheck file path, and make sure the folder is mounted."<<endl;
+			cout<<"System shutting down..."<<endl<<endl;
+			exit(1);
+			break;
+		case 13:
+			cout<<endl<<"[Fatal Error] Cannot open camera pose file. Please recheck file path, and make sure the folder is mounted."<<endl;
+			cout<<"System shutting down..."<<endl<<endl;
+			exit(1);
+			break;
+		case 14:
+			cout<<endl<<"[Fatal Error] Cannot open camera calibration file. Please recheck file path, and make sure the folder is mounted."<<endl;
+			cout<<"System shutting down..."<<endl<<endl;
+			exit(1);
+			break;
 	}
 }
 

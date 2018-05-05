@@ -1,7 +1,7 @@
 #ifndef MYRECONSTR_IMAGEFUNC_H
 #define MYRECONSTR_IMAGEFUNC_H
 
-#include "myproject/MyReconstr_Storage.h"
+#include "myproject/MyReconstr_Map.h"
 
 class MyReconstr_Imagefunc
 {
